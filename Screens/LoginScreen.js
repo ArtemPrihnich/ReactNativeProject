@@ -52,7 +52,7 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : ''}>
       <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
         <Text style={styles.title}>Войти</Text>
         <View style={styles.box}>

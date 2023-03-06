@@ -56,7 +56,7 @@ const RegistrationScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : ''}>
       <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
         <View style={styles.imgBox}>
           <TouchableOpacity style={styles.addImgBtn}>
