@@ -38,6 +38,7 @@ export default function App() {
       <View style={styles.container} onLayout={onLayoutRootView}>
         <ImageBackground style={styles.image} source={require('./assets/images/bgImage.jpg')}>
           <RegistrationScreen />
+          {/* <NewRegistartionScreen /> */}
           {/* <LoginScreen /> */}
         </ImageBackground>
       </View>

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -60,
     left: '50%',
-    transform: 'translateX(-50deg)',
+    transform: [{ translateX: -60 }],
     width: 120,
     height: 120,
     backgroundColor: '#F6F6F6',
