@@ -8,6 +8,7 @@ import PostsScreen from '../Screens/main/PostsScreen';
 import CreatePostsScreen from '../Screens/main/CreatePostsScreen';
 import ProfileScreen from '../Screens/main/ProfileScreen';
 import LogOut from '../assets/images/log-out.svg';
+import ArrowLeft from '../assets/images/arrow-left.svg';
 import PostsIcon from '../assets/images/posts.svg';
 import CreateIcon from '../assets/images/add.svg';
 import ProfileIcon from '../assets/images/user.svg';
@@ -35,7 +36,7 @@ export const useRoute = isAuth => {
           ...baseTabBarOptions,
           headerTitle: 'Публикации',
           headerRight: () => (
-            <TouchableOpacity style={{ marginRight: 10 }}>
+            <TouchableOpacity style={{ marginRight: 16 }}>
               <LogOut width={24} height={24} />
             </TouchableOpacity>
           ),
@@ -49,6 +50,14 @@ export const useRoute = isAuth => {
         options={{
           ...baseTabBarOptions,
           headerTitle: 'Создать Публикацию',
+          headerLeft: () => (
+            <TouchableOpacity style={{ marginLeft: 16 }}>
+              <ArrowLeft width={24} height={24} />
+            </TouchableOpacity>
+          ),
+          headerLeftContainerStyle: {
+            bottom: 10,
+          },
           tabBarIcon: ({ color }) => <CreateIcon name="Create posts" stroke={color} />,
           tabBarItemStyle: { ...baseTabBarOptions.tabBarItemStyle, marginRight: 15 },
         }}
@@ -73,7 +82,6 @@ const baseOptions = {
   headerStyle: {
     height: 88,
     borderBottomWidth: 1,
-    borderBottomColor: '#BDBDBD',
   },
   headerTitleStyle: {
     fontFamily: 'Roboto-Medium',
@@ -95,6 +103,7 @@ const baseOptions = {
   tabBarStyle: {
     height: 60,
     alignItems: 'center',
+    borderTopWidth: 1,
   },
 };
 
