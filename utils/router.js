@@ -1,12 +1,14 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 import LoginScreen from '../Screens/auth/LoginScreen';
 import RegistrationScreen from '../Screens/auth/RegistrationScreen';
 import PostsScreen from '../Screens/main/PostsScreen';
 import CreatePostsScreen from '../Screens/main/CreatePostsScreen';
 import ProfileScreen from '../Screens/main/ProfileScreen';
+import LogoutButton from '../components/LogoutButton';
+import GoBackButton from '../components/GoBackButton';
 import LogOut from '../assets/images/log-out.svg';
 import ArrowLeft from '../assets/images/arrow-left.svg';
 import PostsIcon from '../assets/images/posts.svg';
@@ -30,15 +32,15 @@ export const useRoute = isAuth => {
     );
   }
   return (
-    <MainTabs.Navigator screenOptions={{ ...baseOptions }}>
+    <MainTabs.Navigator initialRouteName="Posts" screenOptions={{ ...baseOptions }}>
       <MainTabs.Screen
         options={{
           ...baseTabBarOptions,
           headerTitle: 'Публикации',
           headerRight: () => (
-            <TouchableOpacity style={{ marginRight: 16 }}>
-              <LogOut width={24} height={24} />
-            </TouchableOpacity>
+            <View style={{ marginRight: 16 }}>
+              <LogoutButton />
+            </View>
           ),
           tabBarIcon: ({ color }) => <PostsIcon name="Posts" stroke={color} />,
           tabBarItemStyle: { ...baseTabBarOptions.tabBarItemStyle, marginRight: 15 },
@@ -51,9 +53,9 @@ export const useRoute = isAuth => {
           ...baseTabBarOptions,
           headerTitle: 'Создать Публикацию',
           headerLeft: () => (
-            <TouchableOpacity style={{ marginLeft: 16 }}>
-              <ArrowLeft width={24} height={24} />
-            </TouchableOpacity>
+            <View style={{ marginLeft: 16 }}>
+              <GoBackButton />
+            </View>
           ),
           headerLeftContainerStyle: {
             bottom: 10,
