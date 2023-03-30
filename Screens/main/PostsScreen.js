@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-const PostsScreen = () => {
+const PostsScreen = ({ route }) => {
+  console.log(route.params);
   return (
     <View style={styles.container}>
       <Text>PostsScreen</Text>

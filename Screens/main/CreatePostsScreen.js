@@ -1,31 +1,70 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 import MapPin from '../../assets/images/map-pin.svg';
 import TrashIcon from '../../assets/images/trash.svg';
+import CameraElement from '../../components/CameraElement';
 
-const CreatePostsScreen = () => {
+const CreatePostsScreen = ({ navigation }) => {
+  const [titleInput, setTitleInput] = useState('');
+  const [locationInput, setLocationInput] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [location, setLocation] = useState(null);
+
+  const writePhoto = data => setPhoto(data);
+  const writeLocation = data => setLocation(data);
+
+  const sendPosts = () => {
+    navigation.navigate('Posts', { photo, location, titleInput, locationInput });
+    setPhoto(null);
+    setLocation(null);
+    setTitleInput('');
+    setLocationInput('');
+  };
+
+  const clearButton = () => {
+    setPhoto(null);
+    setLocation(null);
+    setTitleInput('');
+    setLocationInput('');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <View style={styles.photoBox}></View>
-        <Text style={styles.photoBoxLabel}>Загрузить фото</Text>
-        <TextInput style={{ ...styles.input, marginTop: 48 }} placeholder="Название..." />
+        <View style={styles.photoBox}>
+          <CameraElement
+            writePhoto={writePhoto}
+            writeLocation={writeLocation}
+            photo={photo}
+            location={location}
+          />
+        </View>
+        <Text style={styles.photoBoxLabel}>{photo ? 'Редактировать фото' : 'Загрузить фото'}</Text>
+        <TextInput
+          style={{ ...styles.input, marginTop: 48 }}
+          value={titleInput}
+          onChangeText={value => setTitleInput(value)}
+          maxLength={20}
+          placeholder="Название..."
+        />
         <View style={styles.mapInputBox}>
-          {/* <MapPin width={24} height={24} /> */}
           <TextInput
             style={{ ...styles.input, marginTop: 32, paddingLeft: 28 }}
-            placeholder="Местность..."
+            value={locationInput}
+            onChangeText={value => setLocationInput(value)}
+            maxLength={20}
+            placeholder="Киев, Украина"
           />
           <MapPin style={styles.mapIcon} width={24} height={24} />
         </View>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={sendPosts}>
           <Text style={styles.buttonText}>Опубликовать</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.deleteButtonBox}>
-        <TouchableOpacity style={styles.deleteButton}>
-          <TrashIcon width={24} height={24} />
+        <TouchableOpacity style={styles.deleteButton} onPress={clearButton}>
+          <TrashIcon width={24} height={24} fill="#BDBDBD" />
         </TouchableOpacity>
       </View>
     </View>
@@ -52,6 +91,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8E8E8',
     borderRadius: 8,
+    overflow: 'hidden',
   },
   photoBoxLabel: {
     fontFamily: 'Roboto-Regular',
