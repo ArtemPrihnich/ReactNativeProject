@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View, StyleSheet, ImageBackground, TouchableOpacity, Image } from 'react-native';
 import LogoutButton from '../../components/LogoutButton';
+import AddImage from '../../assets/images/add-image.svg';
 
 const ProfileScreen = () => {
   return (
@@ -8,7 +9,8 @@ const ProfileScreen = () => {
       <View style={styles.profileContainer}>
         <View style={styles.imgBox}>
           <TouchableOpacity style={styles.addImgBtn}>
-            <Image source={require('../../assets/images/addIcon.png')} />
+            {/* <Image source={require('../../assets/images/addIcon.png')} /> */}
+            <AddImage width={25} height={25} />
           </TouchableOpacity>
         </View>
         <View style={styles.logoutBtnBox}>

@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react-native';
 import CameraIcon from '../assets/images/camera-icon.svg';
-import TrashIcon from '../assets/images/trash.svg';
+import TrashIcon from '../assets/images/trash-icon.svg';
 
 const CameraElement = ({ writePhoto, writeLocation, photo, location }) => {
   const [locationPermission, locationRequestPermission] = Location.useForegroundPermissions();

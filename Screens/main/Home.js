@@ -7,9 +7,9 @@ import ProfileScreen from './ProfileScreen';
 import LogoutButton from '../../components/LogoutButton';
 import GoBackButton from '../../components/GoBackButton';
 
-import PostsIcon from '../../assets/images/posts.svg';
-import CreateIcon from '../../assets/images/add.svg';
-import ProfileIcon from '../../assets/images/user.svg';
+import PostsIcon from '../../assets/images/posts-icon.svg';
+import CreateIcon from '../../assets/images/add-icon.svg';
+import ProfileIcon from '../../assets/images/user-icon.svg';
 
 const MainTabs = createBottomTabNavigator();
 

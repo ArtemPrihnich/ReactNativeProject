@@ -8,10 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  Image,
   ImageBackground,
 } from 'react-native';
 import { useKeyboard } from '../../utils/keyboardActive';
+import AddImage from '../../assets/images/add-image.svg';
 
 const initialValue = {
   login: '',
@@ -40,7 +40,7 @@ const RegistrationScreen = ({ navigation }) => {
         <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
           <View style={styles.imgBox}>
             <TouchableOpacity style={styles.addImgBtn}>
-              <Image source={require('../../assets/images/addIcon.png')} />
+              <AddImage width={25} height={25} />
             </TouchableOpacity>
           </View>
           <Text style={styles.title}>Регистрация</Text>

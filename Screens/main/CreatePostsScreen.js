@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 
 import MapPin from '../../assets/images/map-pin.svg';
-import TrashIcon from '../../assets/images/trash.svg';
+import TrashIcon from '../../assets/images/trash-icon.svg';
 import CameraElement from '../../components/CameraElement';
 
 const CreatePostsScreen = ({ navigation }) => {
@@ -31,37 +39,41 @@ const CreatePostsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.form}>
-        <View style={styles.photoBox}>
-          <CameraElement
-            writePhoto={writePhoto}
-            writeLocation={writeLocation}
-            photo={photo}
-            location={location}
-          />
-        </View>
-        <Text style={styles.photoBoxLabel}>{photo ? 'Редактировать фото' : 'Загрузить фото'}</Text>
-        <TextInput
-          style={{ ...styles.input, marginTop: 48 }}
-          value={titleInput}
-          onChangeText={value => setTitleInput(value)}
-          maxLength={20}
-          placeholder="Название..."
-        />
-        <View style={styles.mapInputBox}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'position'}>
+        <View style={styles.form}>
+          <View style={styles.photoBox}>
+            <CameraElement
+              writePhoto={writePhoto}
+              writeLocation={writeLocation}
+              photo={photo}
+              location={location}
+            />
+          </View>
+          <Text style={styles.photoBoxLabel}>
+            {photo ? 'Редактировать фото' : 'Загрузить фото'}
+          </Text>
           <TextInput
-            style={{ ...styles.input, marginTop: 32, paddingLeft: 28 }}
-            value={locationInput}
-            onChangeText={value => setLocationInput(value)}
+            style={{ ...styles.input, marginTop: 48 }}
+            value={titleInput}
+            onChangeText={value => setTitleInput(value)}
             maxLength={20}
-            placeholder="Киев, Украина"
+            placeholder="Название..."
           />
-          <MapPin style={styles.mapIcon} width={24} height={24} />
+          <View style={styles.mapInputBox}>
+            <TextInput
+              style={{ ...styles.input, marginTop: 32, paddingLeft: 28 }}
+              value={locationInput}
+              onChangeText={value => setLocationInput(value)}
+              maxLength={20}
+              placeholder="Киев, Украина"
+            />
+            <MapPin style={styles.mapIcon} width={24} height={24} />
+          </View>
+          <TouchableOpacity style={styles.button} onPress={sendPosts}>
+            <Text style={styles.buttonText}>Опубликовать</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={sendPosts}>
-          <Text style={styles.buttonText}>Опубликовать</Text>
-        </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
       <View style={styles.deleteButtonBox}>
         <TouchableOpacity style={styles.deleteButton} onPress={clearButton}>
           <TrashIcon width={24} height={24} fill="#BDBDBD" />
