@@ -11,72 +11,123 @@ import {
   ImageBackground,
 } from 'react-native';
 import { useKeyboard } from '../../utils/keyboardActive';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 
-const initialValue = {
-  email: '',
-  password: '',
-};
+// const initialValue = {
+//   email: '',
+//   password: '',
+// };
 
 const LoginScreen = ({ navigation }) => {
-  const [value, setValue] = useState(initialValue);
+  // const [value, setValue] = useState(initialValue);
   const [isActiveEmailInput, setIsActiveEmailInput] = useState(false);
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
 
   const keyboardHeight = useKeyboard(0);
 
-  const onSubmitClick = () => {
-    setValue(initialValue);
+  const LoginSchema = Yup.object().shape({
+    email: Yup.string().email('Invalid email').required('Required'),
+    password: Yup.string()
+      .min(8, 'Min password length 8!')
+      .max(30, 'Max password length 30!')
+      .required('Required'),
+  });
+
+  const onSubmitClick = (values, formik) => {
+    console.log(values);
+    formik.resetForm();
     Keyboard.dismiss();
   };
 
   return (
     <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : ''}>
-        <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
-          <Text style={styles.title}>Войти</Text>
-          <View style={styles.box}>
-            <TextInput
-              style={{ ...styles.input, borderColor: isActiveEmailInput ? '#FF6C00' : '#E8E8E8' }}
-              placeholder="Адрес электронной почты"
-              placeholderTextColor="#BDBDBD"
-              value={value.email}
-              id="email"
-              onChangeText={value => setValue(prevState => ({ ...prevState, email: value }))}
-              onFocus={() => setIsActiveEmailInput(true)}
-              onBlur={() => setIsActiveEmailInput(false)}
-            />
-            <View>
-              <TouchableOpacity
-                style={styles.showPassword}
-                onPress={() => setIsShowPassword(!isShowPassword)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.showPasswordText}>Показать</Text>
-              </TouchableOpacity>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor: isActivePasswordInput ? '#FF6C00' : '#E8E8E8',
-                }}
-                placeholder="Пароль"
-                placeholderTextColor="#BDBDBD"
-                secureTextEntry={isShowPassword}
-                value={value.password}
-                id="password"
-                onChangeText={value => setValue(prevState => ({ ...prevState, password: value }))}
-                onFocus={() => setIsActivePasswordInput(true)}
-                onBlur={() => setIsActivePasswordInput(false)}
-              />
+        <Formik
+          initialValues={{
+            email: '',
+            password: '',
+          }}
+          validationSchema={LoginSchema}
+          validateOnMount
+          onSubmit={(values, formik) => onSubmitClick(values, formik)}
+        >
+          {({ values, errors, touched, isValid, setFieldTouched, handleChange, handleSubmit }) => (
+            <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
+              <Text style={styles.title}>Войти</Text>
+              <View style={styles.box}>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={{
+                      ...styles.input,
+                      borderColor: isActiveEmailInput ? '#FF6C00' : '#E8E8E8',
+                    }}
+                    placeholder="Адрес электронной почты"
+                    placeholderTextColor="#BDBDBD"
+                    value={values.email}
+                    id="email"
+                    onChangeText={handleChange('email')}
+                    onFocus={() => setIsActiveEmailInput(true)}
+                    onBlur={() => {
+                      setIsActiveEmailInput(false);
+                      setFieldTouched('email');
+                    }}
+                  />
+                  {touched.email && errors.email && (
+                    <Text style={styles.errorMessage}>{errors.email}</Text>
+                  )}
+                </View>
+                <View style={styles.inputContainer}>
+                  <TouchableOpacity
+                    style={styles.showPassword}
+                    onPress={() => setIsShowPassword(!isShowPassword)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.showPasswordText}>Показать</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={{
+                      ...styles.input,
+                      borderColor: isActivePasswordInput ? '#FF6C00' : '#E8E8E8',
+                    }}
+                    placeholder="Пароль"
+                    placeholderTextColor="#BDBDBD"
+                    secureTextEntry={isShowPassword}
+                    value={values.password}
+                    id="password"
+                    onChangeText={handleChange('password')}
+                    onFocus={() => setIsActivePasswordInput(true)}
+                    onBlur={() => {
+                      setIsActivePasswordInput(false);
+                      setFieldTouched('password');
+                    }}
+                  />
+                  {touched.password && errors.password && (
+                    <Text style={styles.errorMessage}>{errors.password}</Text>
+                  )}
+                </View>
+                {console.log('kyky', isValid)}
+                <TouchableOpacity
+                  style={{ ...styles.button, backgroundColor: isValid ? '#FF6C00' : '#F6F6F6' }}
+                  disabled={!isValid}
+                  onPress={handleSubmit}
+                  activeOpacity={0.7}
+                >
+                  <Text style={{ ...styles.buttonText, color: isValid ? '#FFFFFF' : '#BDBDBD' }}>
+                    Войти
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Register')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <TouchableOpacity style={styles.button} onPress={onSubmitClick} activeOpacity={0.8}>
-              <Text style={styles.buttonText}>Войти</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')} activeOpacity={0.7}>
-              <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          )}
+        </Formik>
       </KeyboardAvoidingView>
     </ImageBackground>
   );
@@ -111,9 +162,11 @@ const styles = StyleSheet.create({
 
     color: '#212121',
   },
+  inputContainer: {
+    marginBottom: 16,
+  },
   input: {
     padding: 16,
-    marginBottom: 16,
 
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
@@ -126,9 +179,20 @@ const styles = StyleSheet.create({
     color: '#212121',
     backgroundColor: '#F6F6F6',
   },
+  errorMessage: {
+    marginTop: 4,
+    marginLeft: 8,
+
+    fontFamily: 'Roboto-Regular',
+    fontSize: 13,
+    lineHeight: 16,
+
+    color: `#FF0000`,
+  },
   showPassword: {
     right: 16,
-    bottom: '50%',
+    top: '50%',
+    transform: [{ translateY: -9.5 }],
     zIndex: 1,
     position: 'absolute',
   },
@@ -146,14 +210,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
 
-    backgroundColor: '#FF6C00',
+    // backgroundColor: '#FF6C00',
   },
   buttonText: {
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,
 
-    color: '#FFFFFF',
+    // color: '#FFFFFF',
   },
   link: {
     fontFamily: 'Roboto-Regular',

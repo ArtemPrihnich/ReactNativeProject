@@ -21,7 +21,7 @@ const PostsScreen = ({ route, navigation }) => {
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
             <Image style={styles.postImage} source={{ uri: item.photo }} />
-            <Text style={styles.postTitle}>{item.titleInput}</Text>
+            <Text style={styles.postTitle}>{item.title}</Text>
             <View style={styles.postComponentsContainer}>
               <TouchableOpacity
                 style={styles.componentContainer}
@@ -40,7 +40,7 @@ const PostsScreen = ({ route, navigation }) => {
                 }
               >
                 <MapPin style={{ marginRight: 4 }} width={24} height={24} />
-                <Text style={styles.mapLocation}>{item.locationInput}</Text>
+                <Text style={styles.mapLocation}>{item.locationName}</Text>
               </TouchableOpacity>
             </View>
           </View>
