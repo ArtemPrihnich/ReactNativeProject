@@ -5,7 +5,7 @@ import { Text, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react
 import CameraIcon from '../assets/images/camera-icon.svg';
 import TrashIcon from '../assets/images/trash-icon.svg';
 
-const CameraElement = ({ writePhoto, writeLocation, photo, location }) => {
+const CameraElement = ({ writePhoto, writeLocation, photo, location, setLocationState }) => {
   const [locationPermission, locationRequestPermission] = Location.useForegroundPermissions();
   const [cameraPermission, cameraRequestPermission] = Camera.useCameraPermissions();
   const [camera, setCamera] = useState(null);
@@ -37,8 +37,13 @@ const CameraElement = ({ writePhoto, writeLocation, photo, location }) => {
   const takePhoto = async () => {
     const makePhoto = await camera.takePictureAsync();
     writePhoto(makePhoto.uri);
-    const getLocation = await Location.getCurrentPositionAsync();
+    setLocationState(true);
+    const getLocation = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Low,
+    });
     writeLocation(getLocation.coords);
+    setLocationState(false);
+    console.log('done');
   };
   const deletePhoto = () => {
     writePhoto(null);
