@@ -5,6 +5,8 @@ import { useCallback } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useRoute } from './utils/router';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,11 +28,13 @@ export default function App() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        <NavigationContainer>{routing}</NavigationContainer>
-      </View>
-    </TouchableWithoutFeedback>
+    <Provider store={store}>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.container} onLayout={onLayoutRootView}>
+          <NavigationContainer>{routing}</NavigationContainer>
+        </View>
+      </TouchableWithoutFeedback>
+    </Provider>
   );
 }
 
