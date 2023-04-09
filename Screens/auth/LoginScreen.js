@@ -13,17 +13,15 @@ import {
 import { useKeyboard } from '../../utils/keyboardActive';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-
-// const initialValue = {
-//   email: '',
-//   password: '',
-// };
+import { useDispatch } from 'react-redux';
+import { authSignInUser } from '../../redux/auth/authOperations';
 
 const LoginScreen = ({ navigation }) => {
-  // const [value, setValue] = useState(initialValue);
   const [isActiveEmailInput, setIsActiveEmailInput] = useState(false);
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
+
+  const dispatch = useDispatch();
 
   const keyboardHeight = useKeyboard(0);
 
@@ -36,6 +34,7 @@ const LoginScreen = ({ navigation }) => {
   });
 
   const onSubmitClick = (values, formik) => {
+    dispatch(authSignInUser(values));
     console.log(values);
     formik.resetForm();
     Keyboard.dismiss();
@@ -107,7 +106,6 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.errorMessage}>{errors.password}</Text>
                   )}
                 </View>
-                {console.log('kyky', isValid)}
                 <TouchableOpacity
                   style={{ ...styles.button, backgroundColor: isValid ? '#FF6C00' : '#F6F6F6' }}
                   disabled={!isValid}

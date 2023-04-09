@@ -1,17 +1,16 @@
 // import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { StyleSheet, View } from 'react-native';
 import { useCallback } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useRoute } from './utils/router';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
+
+import Main from './components/Main';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const routing = useRoute({});
   const [fontsLoaded] = useFonts({
     'Roboto-Regular': require('./assets/fonts/Roboto-Regular.ttf'),
     'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf'),
@@ -29,11 +28,9 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <View style={styles.container} onLayout={onLayoutRootView}>
-          <NavigationContainer>{routing}</NavigationContainer>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <Main />
+      </View>
     </Provider>
   );
 }

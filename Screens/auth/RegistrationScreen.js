@@ -14,6 +14,8 @@ import { useKeyboard } from '../../utils/keyboardActive';
 import AddImage from '../../assets/images/add-image.svg';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { authSignUpUser } from '../../redux/auth/authOperations';
 
 const RegistrationScreen = ({ navigation }) => {
   const [isActiveLoginInput, setIsActiveLoginInput] = useState(false);
@@ -21,21 +23,24 @@ const RegistrationScreen = ({ navigation }) => {
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
 
+  const dispatch = useDispatch();
+
   const keyboardHeight = useKeyboard(62);
 
   const onSubmitClick = (values, formik) => {
+    dispatch(authSignUpUser(values));
     console.log(values);
     formik.resetForm();
     Keyboard.dismiss();
   };
 
   const SignupSchema = Yup.object().shape({
-    loginN: Yup.string()
+    login: Yup.string()
       .min(3, 'Min login length 3!')
       .max(20, 'Max login length 20!')
       .required('Required'),
-    emailN: Yup.string().email('Invalid email').required('Required'),
-    passwordN: Yup.string()
+    email: Yup.string().email('Invalid email').required('Required'),
+    password: Yup.string()
       .min(8, 'Min password length 8!')
       .max(30, 'Max password length 30!')
       .required('Required'),
@@ -46,9 +51,9 @@ const RegistrationScreen = ({ navigation }) => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : ''}>
         <Formik
           initialValues={{
-            loginN: '',
-            emailN: '',
-            passwordN: '',
+            login: '',
+            email: '',
+            password: '',
           }}
           validationSchema={SignupSchema}
           validateOnMount
@@ -71,17 +76,17 @@ const RegistrationScreen = ({ navigation }) => {
                     }}
                     placeholder="Логин"
                     placeholderTextColor="#BDBDBD"
-                    value={values.loginN}
+                    value={values.login}
                     id="login"
-                    onChangeText={handleChange('loginN')}
+                    onChangeText={handleChange('login')}
                     onFocus={() => setIsActiveLoginInput(true)}
                     onBlur={() => {
                       setIsActiveLoginInput(false);
-                      setFieldTouched('loginN');
+                      setFieldTouched('login');
                     }}
                   />
-                  {touched.loginN && errors.loginN && (
-                    <Text style={styles.errorMessage}>{errors.loginN}</Text>
+                  {touched.login && errors.login && (
+                    <Text style={styles.errorMessage}>{errors.login}</Text>
                   )}
                 </View>
                 <View style={styles.inputContainer}>
@@ -92,17 +97,17 @@ const RegistrationScreen = ({ navigation }) => {
                     }}
                     placeholder="Адрес электронной почты"
                     placeholderTextColor="#BDBDBD"
-                    value={values.emailN}
+                    value={values.email}
                     id={1}
-                    onChangeText={handleChange('emailN')}
+                    onChangeText={handleChange('email')}
                     onFocus={() => setIsActiveEmailInput(true)}
                     onBlur={() => {
                       setIsActiveEmailInput(false);
-                      setFieldTouched('emailN');
+                      setFieldTouched('email');
                     }}
                   />
-                  {touched.emailN && errors.emailN && (
-                    <Text style={styles.errorMessage}>{errors.emailN}</Text>
+                  {touched.email && errors.email && (
+                    <Text style={styles.errorMessage}>{errors.email}</Text>
                   )}
                 </View>
                 <View style={styles.inputContainer}>
@@ -122,18 +127,18 @@ const RegistrationScreen = ({ navigation }) => {
                       placeholder="Пароль"
                       placeholderTextColor="#BDBDBD"
                       secureTextEntry={isShowPassword}
-                      value={values.passwordN}
+                      value={values.password}
                       id="password"
-                      onChangeText={handleChange('passwordN')}
+                      onChangeText={handleChange('password')}
                       onFocus={() => setIsActivePasswordInput(true)}
                       onBlur={() => {
                         setIsActivePasswordInput(false);
-                        setFieldTouched('passwordN');
+                        setFieldTouched('password');
                       }}
                     />
                   </View>
-                  {touched.passwordN && errors.passwordN && (
-                    <Text style={styles.errorMessage}>{errors.passwordN}</Text>
+                  {touched.password && errors.password && (
+                    <Text style={styles.errorMessage}>{errors.password}</Text>
                   )}
                 </View>
                 <TouchableOpacity
