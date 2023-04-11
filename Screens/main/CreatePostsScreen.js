@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Text,
   View,
@@ -10,6 +11,10 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { cloudStorage, db } from '../../firebase/config';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { collection, addDoc } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 import MapPin from '../../assets/images/map-pin.svg';
 import TrashIcon from '../../assets/images/trash-icon.svg';
@@ -19,6 +24,8 @@ const CreatePostsScreen = ({ navigation }) => {
   const [photo, setPhoto] = useState(null);
   const [location, setLocation] = useState(null);
   const [locationState, setLocationState] = useState(false);
+
+  const { userId, nickName } = useSelector(state => state.auth);
 
   const CreatePostSchema = Yup.object().shape({
     title: Yup.string()
@@ -37,12 +44,46 @@ const CreatePostsScreen = ({ navigation }) => {
   const writePhoto = data => setPhoto(data);
   const writeLocation = data => setLocation(data);
 
-  const sendPosts = (values, formik) => {
-    const { title, locationName } = values;
-    navigation.navigate('Posts', { photo, location, title, locationName });
-    formik.resetForm();
-    setPhoto(null);
-    setLocation(null);
+  const uploadPhotoToServer = async () => {
+    try {
+      const responce = await fetch(photo);
+      const file = await responce.blob();
+      const uniquePhotoId = uuidv4();
+
+      const storageRef = ref(cloudStorage, `postImage/${uniquePhotoId}`);
+      await uploadBytes(storageRef, file);
+      const processedPhoto = await getDownloadURL(ref(storageRef));
+
+      return processedPhoto;
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const uploadPostToServer = async (processedPhoto, title, locationName) => {
+    await addDoc(collection(db, 'posts'), {
+      photo: processedPhoto,
+      title,
+      locationName,
+      location,
+      userId,
+      nickName,
+    });
+  };
+
+  const sendPosts = async (values, formik) => {
+    try {
+      const { title, locationName } = values;
+      const processedPhoto = await uploadPhotoToServer();
+      await uploadPostToServer(processedPhoto, title, locationName);
+
+      navigation.navigate('Posts');
+      formik.resetForm();
+      setPhoto(null);
+      setLocation(null);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   const clearButton = resetForm => {

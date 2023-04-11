@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+
 import MessageIcon from '../../assets/images/message-icon.svg';
 import MapPin from '../../assets/images/map-pin.svg';
 
-const PostsScreen = ({ route, navigation }) => {
-  console.log(route);
-  console.log(navigation);
+const PostsScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
 
+  const getAllPosts = () => {
+    onSnapshot(collection(db, 'posts'), data => {
+      setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    });
+  };
+
   useEffect(() => {
-    if (route.params) {
-      setPosts(prevState => [...prevState, route.params]);
-    }
-  }, [route.params]);
+    getAllPosts();
+  }, []);
   return (
     <View style={styles.container}>
       <FlatList
