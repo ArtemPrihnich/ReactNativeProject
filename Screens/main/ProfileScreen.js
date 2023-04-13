@@ -1,15 +1,45 @@
-import React from 'react';
-import { Text, View, StyleSheet, ImageBackground, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Text,
+  View,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  Image,
+  FlatList,
+} from 'react-native';
 import LogoutButton from '../../components/LogoutButton';
 import AddImage from '../../assets/images/add-image.svg';
+import { db } from '../../firebase/config';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
+
+import MessageIcon from '../../assets/images/message-icon.svg';
+import MapPin from '../../assets/images/map-pin.svg';
 
 const ProfileScreen = () => {
+  const [posts, setPosts] = useState([]);
+  console.log(posts);
+  const { userId } = useSelector(state => state.auth);
+
+  const q = query(collection(db, 'posts'), where('userId', '==', userId));
+
+  const getAllUserPosts = () => {
+    onSnapshot(q, data => {
+      console.log(data);
+      setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    });
+  };
+
+  useEffect(() => {
+    getAllUserPosts();
+  }, []);
+
   return (
     <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
       <View style={styles.profileContainer}>
         <View style={styles.imgBox}>
           <TouchableOpacity style={styles.addImgBtn}>
-            {/* <Image source={require('../../assets/images/addIcon.png')} /> */}
             <AddImage width={25} height={25} />
           </TouchableOpacity>
         </View>
@@ -18,6 +48,40 @@ const ProfileScreen = () => {
         </View>
         <View style={styles.userInfoBox}>
           <Text style={styles.userName}>Artem Prihnich</Text>
+        </View>
+        <View style={styles.userPostsContainer}>
+          <FlatList
+            data={posts}
+            // contentContainerStyle={{ marginBottom: 32 }}
+            keyExtractor={(item, indx) => indx.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.postContainer}>
+                <Image style={styles.postImage} source={{ uri: item.photo }} />
+                <Text style={styles.postTitle}>{item.title}</Text>
+                <View style={styles.postComponentsContainer}>
+                  <TouchableOpacity
+                    style={styles.componentContainer}
+                    onPress={() => navigation.navigate('Comments', { postId: item.id })}
+                  >
+                    <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
+                    <Text style={styles.commentsCounter}>0</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.componentContainer}
+                    onPress={() =>
+                      navigation.navigate('Map', {
+                        latitude: item.location.latitude,
+                        longitude: item.location.longitude,
+                      })
+                    }
+                  >
+                    <MapPin style={{ marginRight: 4 }} width={24} height={24} />
+                    <Text style={styles.mapLocation}>{item.locationName}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          />
         </View>
       </View>
     </ImageBackground>
@@ -28,9 +92,9 @@ export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // flex: 1,
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   image: {
     flex: 1,
@@ -42,7 +106,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginTop: 120,
     paddingTop: 92,
-    paddingBottom: 78,
     backgroundColor: '#ffffff',
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
@@ -78,6 +141,56 @@ const styles = StyleSheet.create({
     lineHeight: 35,
     textAlign: 'center',
     letterSpacing: 0.01,
+
+    color: '#212121',
+  },
+
+  /////////////////////////////////////////////
+
+  userPostsContainer: {
+    paddingTop: 32,
+    paddingBottom: 32,
+  },
+  postContainer: {
+    marginHorizontal: 16,
+    marginBottom: 32,
+  },
+  postImage: {
+    height: 240,
+    width: '100%',
+    borderRadius: 8,
+
+    marginBottom: 8,
+  },
+  postTitle: {
+    marginBottom: 8,
+
+    fontFamily: 'Roboto-Medium',
+    fontSize: 16,
+    lineHeight: 19,
+
+    color: '#212121',
+  },
+  postComponentsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  componentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  commentsCounter: {
+    fontFamily: 'Roboto-Regular',
+    fontSize: 16,
+    lineHeight: 19,
+
+    color: '#BDBDBD',
+  },
+  mapLocation: {
+    fontFamily: 'Roboto-Regular',
+    fontSize: 16,
+    lineHeight: 19,
+    textDecorationLine: 'underline',
 
     color: '#212121',
   },

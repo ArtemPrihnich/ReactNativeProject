@@ -14,6 +14,7 @@ import * as Yup from 'yup';
 import { cloudStorage, db } from '../../firebase/config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { collection, addDoc } from 'firebase/firestore';
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
 import MapPin from '../../assets/images/map-pin.svg';

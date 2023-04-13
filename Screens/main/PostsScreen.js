@@ -22,6 +22,7 @@ const PostsScreen = ({ navigation }) => {
     <View style={styles.container}>
       <FlatList
         data={posts}
+        // contentContainerStyle={{ paddingBottom: 32 }}
         keyExtractor={(item, indx) => indx.toString()}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
@@ -30,7 +31,7 @@ const PostsScreen = ({ navigation }) => {
             <View style={styles.postComponentsContainer}>
               <TouchableOpacity
                 style={styles.componentContainer}
-                onPress={() => navigation.navigate('Comments')}
+                onPress={() => navigation.navigate('Comments', { postId: item.id })}
               >
                 <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
                 <Text style={styles.commentsCounter}>0</Text>
@@ -60,6 +61,7 @@ export default PostsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 32,
     // justifyContent: 'center',
     // alignItems: 'center',
 
@@ -67,7 +69,7 @@ const styles = StyleSheet.create({
   },
   postContainer: {
     marginHorizontal: 16,
-    marginTop: 32,
+    marginBottom: 32,
   },
   postImage: {
     height: 240,
