@@ -41,7 +41,7 @@ const Home = ({ navigation }) => {
             </View>
           ),
           headerLeftContainerStyle: {
-            bottom: 10,
+            // bottom: 10,
           },
           tabBarIcon: ({ color }) => <CreateIcon name="Create posts" stroke={color} />,
           tabBarItemStyle: { ...baseTabBarOptions.tabBarItemStyle, marginRight: 15 },
@@ -68,8 +68,7 @@ export default Home;
 const baseOptions = {
   headerTitleAlign: 'center',
   headerStyle: {
-    height: 88,
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
   },
   headerTitleStyle: {
     fontFamily: 'Roboto-Medium',
@@ -82,14 +81,14 @@ const baseOptions = {
     color: '#212121',
   },
   headerTitleContainerStyle: {
-    bottom: 10,
+    // bottom: 10,
   },
   headerRightContainerStyle: {
-    bottom: 10,
+    // bottom: 10,
   },
   tabBarShowLabel: false,
   tabBarStyle: {
-    height: 60,
+    // height: 60,
     alignItems: 'center',
     borderTopWidth: 1,
   },
@@ -102,7 +101,7 @@ const baseTabBarOptions = {
   tabBarItemStyle: {
     maxHeight: 40,
     maxWidth: 70,
-    marginTop: 10,
+    marginVertical: 5,
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     borderBottomRightRadius: 20,

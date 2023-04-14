@@ -17,7 +17,7 @@ import { useSelector } from 'react-redux';
 import MessageIcon from '../../assets/images/message-icon.svg';
 import MapPin from '../../assets/images/map-pin.svg';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   console.log(posts);
   const { userId } = useSelector(state => state.auth);
@@ -64,7 +64,6 @@ const ProfileScreen = () => {
                     onPress={() => navigation.navigate('Comments', { postId: item.id })}
                   >
                     <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
-                    <Text style={styles.commentsCounter}>0</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.componentContainer}
@@ -178,13 +177,6 @@ const styles = StyleSheet.create({
   componentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  commentsCounter: {
-    fontFamily: 'Roboto-Regular',
-    fontSize: 16,
-    lineHeight: 19,
-
-    color: '#BDBDBD',
   },
   mapLocation: {
     fontFamily: 'Roboto-Regular',

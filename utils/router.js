@@ -27,7 +27,22 @@ export const useRoute = isAuth => {
     <Stack.Navigator>
       <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
       <Stack.Screen name="Comments" component={CommentsScreen} />
-      <Stack.Screen name="Map" component={MapScreen} />
+      <Stack.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          headerTitleStyle: {
+            fontFamily: 'Roboto-Medium',
+            fontSize: 17,
+            lineHeight: 22,
+
+            textAlign: 'center',
+            letterSpacing: -0.408,
+
+            color: '#212121',
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 };

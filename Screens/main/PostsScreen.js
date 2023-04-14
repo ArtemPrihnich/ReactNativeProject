@@ -8,9 +8,11 @@ import MapPin from '../../assets/images/map-pin.svg';
 
 const PostsScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
+  console.log(posts);
 
   const getAllPosts = () => {
     onSnapshot(collection(db, 'posts'), data => {
+      console.log(data.docs);
       setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
     });
   };
@@ -34,7 +36,6 @@ const PostsScreen = ({ navigation }) => {
                 onPress={() => navigation.navigate('Comments', { postId: item.id })}
               >
                 <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
-                <Text style={styles.commentsCounter}>0</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.componentContainer}
@@ -94,13 +95,6 @@ const styles = StyleSheet.create({
   componentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  commentsCounter: {
-    fontFamily: 'Roboto-Regular',
-    fontSize: 16,
-    lineHeight: 19,
-
-    color: '#BDBDBD',
   },
   mapLocation: {
     fontFamily: 'Roboto-Regular',
