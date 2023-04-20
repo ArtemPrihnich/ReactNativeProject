@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 
-export const useKeyboard = height => {
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+export const useKeyboard = () => {
+  const [keyboardHeight, setKeyboardHeight] = useState(false);
 
   useEffect(() => {
-    function onKeyboardDidShow(keyboard) {
-      setKeyboardHeight(-keyboard.endCoordinates.height + height);
+    function onKeyboardDidShow() {
+      setKeyboardHeight(true);
     }
 
     function onKeyboardDidHide() {
-      setKeyboardHeight(0);
+      setKeyboardHeight(false);
     }
 
     const showSubscription = Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);

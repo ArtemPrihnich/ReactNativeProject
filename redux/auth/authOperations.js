@@ -41,7 +41,7 @@ export const authSignInUser =
 export const authLogOutUser = () => async (dispatch, getState) => {
   try {
     await signOut(auth);
-    dispatch(authSignOut());
+    dispatch(authSignOut({ stateChange: false }));
   } catch (error) {
     console.log('error', error);
     console.log('error.message', error.message);

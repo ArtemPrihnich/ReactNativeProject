@@ -16,8 +16,11 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { authSignUpUser } from '../../redux/auth/authOperations';
+import { useEffect } from 'react';
 
 const RegistrationScreen = ({ navigation }) => {
+  const [keyboardIsVisible, setKeyboardIsVisible] = useState(false);
+  console.log(keyboardIsVisible);
   const [isActiveLoginInput, setIsActiveLoginInput] = useState(false);
   const [isActiveEmailInput, setIsActiveEmailInput] = useState(false);
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
@@ -25,7 +28,8 @@ const RegistrationScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  const keyboardHeight = useKeyboard(62);
+  const keyboardHeight = useKeyboard();
+  console.log(keyboardHeight);
 
   const onSubmitClick = (values, formik) => {
     dispatch(authSignUpUser(values));
@@ -46,119 +50,137 @@ const RegistrationScreen = ({ navigation }) => {
       .required('Required'),
   });
 
+  // useEffect(() => {
+  //   const showSubscription = Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
+  //   const hideSubscription = Keyboard.addListener('keyboardDidHide', onKeyboardDidHide);
+
+  //   function onKeyboardDidShow() {
+  //     setKeyboardIsVisible(true);
+  //   }
+
+  //   function onKeyboardDidHide() {
+  //     setKeyboardIsVisible(false);
+  //   }
+
+  //   return () => {
+  //     showSubscription.remove();
+  //     hideSubscription.remove();
+  //   };
+  // }, []);
+
   return (
     <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : ''}>
-        <Formik
-          initialValues={{
-            login: '',
-            email: '',
-            password: '',
-          }}
-          validationSchema={SignupSchema}
-          validateOnMount
-          onSubmit={(values, formik) => onSubmitClick(values, formik)}
-        >
-          {({ values, errors, touched, handleChange, setFieldTouched, isValid, handleSubmit }) => (
-            <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
-              <View style={styles.imgBox}>
-                <TouchableOpacity style={styles.addImgBtn}>
-                  <AddImage width={25} height={25} />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.title}>Регистрация</Text>
-              <View style={styles.box}>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={{
-                      ...styles.input,
-                      borderColor: isActiveLoginInput ? '#FF6C00' : '#E8E8E8',
-                    }}
-                    placeholder="Логин"
-                    placeholderTextColor="#BDBDBD"
-                    value={values.login}
-                    id="login"
-                    onChangeText={handleChange('login')}
-                    onFocus={() => setIsActiveLoginInput(true)}
-                    onBlur={() => {
-                      setIsActiveLoginInput(false);
-                      setFieldTouched('login');
-                    }}
-                  />
-                  {touched.login && errors.login && (
-                    <Text style={styles.errorMessage}>{errors.login}</Text>
-                  )}
-                </View>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={{
-                      ...styles.input,
-                      borderColor: isActiveEmailInput ? '#FF6C00' : '#E8E8E8',
-                    }}
-                    placeholder="Адрес электронной почты"
-                    placeholderTextColor="#BDBDBD"
-                    value={values.email}
-                    id={1}
-                    onChangeText={handleChange('email')}
-                    onFocus={() => setIsActiveEmailInput(true)}
-                    onBlur={() => {
-                      setIsActiveEmailInput(false);
-                      setFieldTouched('email');
-                    }}
-                  />
-                  {touched.email && errors.email && (
-                    <Text style={styles.errorMessage}>{errors.email}</Text>
-                  )}
-                </View>
-                <View style={styles.inputContainer}>
-                  <View style={{ position: 'relative' }}>
-                    <TouchableOpacity
-                      style={styles.showPassword}
-                      onPress={() => setIsShowPassword(!isShowPassword)}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={styles.showPasswordText}>Показать</Text>
-                    </TouchableOpacity>
-                    <TextInput
-                      style={{
-                        ...styles.input,
-                        borderColor: isActivePasswordInput ? '#FF6C00' : '#E8E8E8',
-                      }}
-                      placeholder="Пароль"
-                      placeholderTextColor="#BDBDBD"
-                      secureTextEntry={isShowPassword}
-                      value={values.password}
-                      id="password"
-                      onChangeText={handleChange('password')}
-                      onFocus={() => setIsActivePasswordInput(true)}
-                      onBlur={() => {
-                        setIsActivePasswordInput(false);
-                        setFieldTouched('password');
-                      }}
-                    />
-                  </View>
-                  {touched.password && errors.password && (
-                    <Text style={styles.errorMessage}>{errors.password}</Text>
-                  )}
-                </View>
-                <TouchableOpacity
-                  style={{ ...styles.button, backgroundColor: isValid ? '#FF6C00' : '#F6F6F6' }}
-                  disabled={!isValid}
-                  onPress={handleSubmit}
-                  activeOpacity={0.8}
-                >
-                  <Text style={{ ...styles.buttonText, color: isValid ? '#FFFFFF' : '#BDBDBD' }}>
-                    Зарегистрироваться
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
-                  <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
-                </TouchableOpacity>
-              </View>
+      {/* <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}> */}
+      <Formik
+        initialValues={{
+          login: '',
+          email: '',
+          password: '',
+        }}
+        validationSchema={SignupSchema}
+        validateOnMount
+        onSubmit={(values, formik) => onSubmitClick(values, formik)}
+      >
+        {({ values, errors, touched, handleChange, setFieldTouched, isValid, handleSubmit }) => (
+          <View style={{ ...styles.form, marginBottom: keyboardHeight ? -186 : 0 }}>
+            <View style={styles.imgBox}>
+              <TouchableOpacity style={styles.addImgBtn}>
+                <AddImage width={25} height={25} />
+              </TouchableOpacity>
             </View>
-          )}
-        </Formik>
-      </KeyboardAvoidingView>
+            <Text style={styles.title}>Регистрация</Text>
+            <View style={styles.box}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor: isActiveLoginInput ? '#FF6C00' : '#E8E8E8',
+                  }}
+                  placeholder="Логин"
+                  placeholderTextColor="#BDBDBD"
+                  value={values.login}
+                  id="login"
+                  onChangeText={handleChange('login')}
+                  onFocus={() => setIsActiveLoginInput(true)}
+                  onBlur={() => {
+                    setIsActiveLoginInput(false);
+                    setFieldTouched('login');
+                  }}
+                />
+                {touched.login && errors.login && (
+                  <Text style={styles.errorMessage}>{errors.login}</Text>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor: isActiveEmailInput ? '#FF6C00' : '#E8E8E8',
+                  }}
+                  placeholder="Адрес электронной почты"
+                  placeholderTextColor="#BDBDBD"
+                  value={values.email}
+                  id={1}
+                  onChangeText={handleChange('email')}
+                  onFocus={() => setIsActiveEmailInput(true)}
+                  onBlur={() => {
+                    setIsActiveEmailInput(false);
+                    setFieldTouched('email');
+                  }}
+                />
+                {touched.email && errors.email && (
+                  <Text style={styles.errorMessage}>{errors.email}</Text>
+                )}
+              </View>
+              <View style={{ ...styles.inputContainer }}>
+                <View style={{ position: 'relative' }}>
+                  <TouchableOpacity
+                    style={styles.showPassword}
+                    onPress={() => setIsShowPassword(!isShowPassword)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.showPasswordText}>Показать</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={{
+                      ...styles.input,
+                      borderColor: isActivePasswordInput ? '#FF6C00' : '#E8E8E8',
+                    }}
+                    placeholder="Пароль"
+                    placeholderTextColor="#BDBDBD"
+                    secureTextEntry={isShowPassword}
+                    value={values.password}
+                    id="password"
+                    onChangeText={handleChange('password')}
+                    onFocus={() => setIsActivePasswordInput(true)}
+                    onBlur={() => {
+                      setIsActivePasswordInput(false);
+                      setFieldTouched('password');
+                    }}
+                  />
+                </View>
+                {touched.password && errors.password && (
+                  <Text style={styles.errorMessage}>{errors.password}</Text>
+                )}
+              </View>
+              <TouchableOpacity
+                style={{ ...styles.button, backgroundColor: isValid ? '#FF6C00' : '#F6F6F6' }}
+                disabled={!isValid}
+                onPress={handleSubmit}
+                activeOpacity={0.8}
+              >
+                <Text style={{ ...styles.buttonText, color: isValid ? '#FFFFFF' : '#BDBDBD' }}>
+                  Зарегистрироваться
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
+                <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </Formik>
+      {/* </KeyboardAvoidingView> */}
     </ImageBackground>
   );
 };
@@ -168,7 +190,7 @@ export default RegistrationScreen;
 const styles = StyleSheet.create({
   image: {
     flex: 1,
-    resizeMode: 'cover',
+    // resizeMode: 'cover',
     justifyContent: 'flex-end',
   },
   imgBox: {
@@ -211,7 +233,8 @@ const styles = StyleSheet.create({
     color: '#212121',
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
+    paddingBottom: 16,
   },
   input: {
     padding: 16,
@@ -228,8 +251,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
   },
   errorMessage: {
-    marginTop: 4,
-    marginLeft: 8,
+    position: 'absolute',
+    bottom: 0,
+    left: 8,
 
     fontFamily: 'Roboto-Regular',
     fontSize: 13,

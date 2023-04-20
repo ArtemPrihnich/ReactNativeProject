@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import LogoutButton from '../../components/LogoutButton';
 import AddImage from '../../assets/images/add-image.svg';
-import { db } from '../../firebase/config';
+import { db, auth } from '../../firebase/config';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
 
@@ -19,20 +19,17 @@ import MapPin from '../../assets/images/map-pin.svg';
 
 const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
-  console.log(posts);
   const { userId } = useSelector(state => state.auth);
 
   const q = query(collection(db, 'posts'), where('userId', '==', userId));
 
-  const getAllUserPosts = () => {
-    onSnapshot(q, data => {
-      console.log(data);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(q, data => {
       setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
     });
-  };
-
-  useEffect(() => {
-    getAllUserPosts();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (

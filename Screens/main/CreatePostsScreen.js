@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -114,8 +115,9 @@ const CreatePostsScreen = ({ navigation }) => {
           handleSubmit,
           resetForm,
         }) => (
-          <View style={{ justifyContent: 'space-between', flex: 1 }}>
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'position'}>
+          <View style={{ flex: 1 }}>
+            {/* <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'position'}> */}
+            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}>
               <View style={styles.form}>
                 <View style={styles.photoBox}>
                   <CameraElement
@@ -180,12 +182,16 @@ const CreatePostsScreen = ({ navigation }) => {
                   </Text>
                 </TouchableOpacity>
               </View>
-            </KeyboardAvoidingView>
-            <View style={styles.deleteButtonBox}>
-              <TouchableOpacity style={styles.deleteButton} onPress={() => clearButton(resetForm)}>
-                <TrashIcon width={24} height={24} fill="#BDBDBD" />
-              </TouchableOpacity>
-            </View>
+              {/* </KeyboardAvoidingView> */}
+              <View style={styles.deleteButtonBox}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => clearButton(resetForm)}
+                >
+                  <TrashIcon width={24} height={24} fill="#BDBDBD" />
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         )}
       </Formik>
@@ -198,6 +204,7 @@ export default CreatePostsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // marginBottom: 50,
     backgroundColor: '#FFFFFF',
   },
   form: {
@@ -220,11 +227,13 @@ const styles = StyleSheet.create({
     color: '#BDBDBD',
   },
   inputContainer: {
-    paddingBottom: 16,
+    // paddingBottom: 16,
     borderBottomWidth: 1,
     borderColor: '#E8E8E8',
   },
   input: {
+    width: '100%',
+    paddingBottom: 16,
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,
@@ -232,7 +241,7 @@ const styles = StyleSheet.create({
   },
   errorMessage: {
     position: 'absolute',
-    bottom: 2,
+    bottom: 3,
     marginTop: 4,
     marginLeft: 8,
 

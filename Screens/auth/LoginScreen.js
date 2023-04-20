@@ -10,7 +10,7 @@ import {
   Keyboard,
   ImageBackground,
 } from 'react-native';
-import { useKeyboard } from '../../utils/keyboardActive';
+// import { useKeyboard } from '../../utils/keyboardActive';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
@@ -23,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  const keyboardHeight = useKeyboard(0);
+  // const keyboardHeight = useKeyboard(0);
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
@@ -42,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : ''}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Formik
           initialValues={{
             email: '',
@@ -53,7 +53,7 @@ const LoginScreen = ({ navigation }) => {
           onSubmit={(values, formik) => onSubmitClick(values, formik)}
         >
           {({ values, errors, touched, isValid, setFieldTouched, handleChange, handleSubmit }) => (
-            <View style={{ ...styles.form, marginBottom: keyboardHeight }}>
+            <View style={{ ...styles.form }}>
               <Text style={styles.title}>Войти</Text>
               <View style={styles.box}>
                 <View style={styles.inputContainer}>
@@ -161,7 +161,8 @@ const styles = StyleSheet.create({
     color: '#212121',
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
+    paddingBottom: 16,
   },
   input: {
     padding: 16,
@@ -178,8 +179,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
   },
   errorMessage: {
-    marginTop: 4,
-    marginLeft: 8,
+    position: 'absolute',
+    bottom: 0,
+    left: 8,
 
     fontFamily: 'Roboto-Regular',
     fontSize: 13,

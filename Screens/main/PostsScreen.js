@@ -10,15 +10,13 @@ const PostsScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   console.log(posts);
 
-  const getAllPosts = () => {
-    onSnapshot(collection(db, 'posts'), data => {
-      console.log(data.docs);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'posts'), data => {
       setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
     });
-  };
-
-  useEffect(() => {
-    getAllPosts();
+    return () => {
+      unsubscribe();
+    };
   }, []);
   return (
     <View style={styles.container}>
@@ -33,7 +31,9 @@ const PostsScreen = ({ navigation }) => {
             <View style={styles.postComponentsContainer}>
               <TouchableOpacity
                 style={styles.componentContainer}
-                onPress={() => navigation.navigate('Comments', { postId: item.id })}
+                onPress={() =>
+                  navigation.navigate('Comments', { postId: item.id, photo: item.photo })
+                }
               >
                 <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
               </TouchableOpacity>
