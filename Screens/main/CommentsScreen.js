@@ -13,6 +13,7 @@ import {
 import { db } from '../../firebase/config';
 import { doc, collection, setDoc, onSnapshot, addDoc } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
+import { useKeyboard } from '../../utils/keyboardActive';
 import SendIcon from '../../assets/images/send-icon.svg';
 import UserIcon from '../../assets/images/user-icon.svg';
 
@@ -25,12 +26,15 @@ const CommentsScreen = ({ route }) => {
   const [allComments, setAllComments] = useState([]);
   console.log(allComments);
 
+  const keyboardIsActive = useKeyboard();
+
   // const commentsRef = doc(collection(db, 'posts', postId, 'comments'));
   const commentsRef = collection(db, 'posts', postId, 'comments');
 
   const sendComment = async () => {
     try {
-      await addDoc(commentsRef, { comment, nickName });
+      await addDoc(commentsRef, { comment, nickName, time: Date.now() });
+      setComment('');
     } catch (error) {
       console.log(error.message);
     }
@@ -38,7 +42,9 @@ const CommentsScreen = ({ route }) => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(commentsRef, data => {
-      setAllComments(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      setAllComments(
+        data.docs.map(doc => ({ ...doc.data(), id: doc.id })).sort((a, b) => a.time - b.time)
+      );
     });
 
     return () => {
@@ -48,7 +54,10 @@ const CommentsScreen = ({ route }) => {
 
   return (
     <View style={{ flex: 1, marginHorizontal: 16 }}>
-      <Image style={styles.postPhoto} source={{ uri: photo }} />
+      <Image
+        style={{ ...styles.postPhoto, height: keyboardIsActive ? 0 : 240 }}
+        source={{ uri: photo }}
+      />
       <FlatList
         data={allComments}
         ref={ref => {
@@ -57,8 +66,6 @@ const CommentsScreen = ({ route }) => {
         keyExtractor={item => item.id}
         onContentSizeChange={() => flatList.scrollToEnd({ animated: true })}
         onLayout={() => flatList.scrollToEnd({ animated: false })}
-        // ListHeaderComponent={<View />}
-        // ListHeaderComponentStyle={{ marginTop: 20 }}
         renderItem={({ item }) => (
           <View style={styles.commentCont}>
             <View style={styles.userInfo}>
@@ -67,12 +74,29 @@ const CommentsScreen = ({ route }) => {
               </View>
               <Text style={styles.userNickName}>{item.nickName}</Text>
             </View>
-            <Text style={styles.comment}>{item.comment}</Text>
+            <View style={styles.textBox}>
+              <Text style={styles.comment}>{item.comment}</Text>
+              {/* <Text>{new Date(item.time).toLocaleTimeString('ua-UA')}</Text> */}
+              <Text style={styles.date}>
+                {new Date(item.time).toLocaleString('ua-UA', {
+                  day: 'numeric',
+                  month: 'numeric',
+                  year: '2-digit',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}
+              </Text>
+            </View>
           </View>
         )}
       />
       <View style={styles.inputContainer}>
-        <TextInput placeholder="Комментировать..." style={styles.input} onChangeText={setComment} />
+        <TextInput
+          placeholder="Комментировать..."
+          style={styles.input}
+          value={comment}
+          onChangeText={setComment}
+        />
         <TouchableOpacity style={styles.button} onPress={sendComment}>
           <SendIcon width={34} height={34} />
         </TouchableOpacity>
@@ -94,7 +118,7 @@ const styles = StyleSheet.create({
   postPhoto: {
     marginTop: 16,
     marginBottom: 16,
-    height: 240,
+    // height: 240,
     width: '100%',
 
     borderRadius: 8,
@@ -122,21 +146,40 @@ const styles = StyleSheet.create({
 
     color: '#212121',
   },
-  comment: {
+  textBox: {
     marginLeft: 28,
     paddingHorizontal: 16,
     paddingVertical: 8,
 
-    fontFamily: 'Roboto-Regular',
-    fontSize: 13,
-    lineHeight: 18,
-
-    color: '#212121',
     backgroundColor: '#D3D3D3',
 
     borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
     borderBottomLeftRadius: 6,
+  },
+  comment: {
+    // marginLeft: 28,
+    // paddingHorizontal: 16,
+    // paddingVertical: 8,
+
+    fontFamily: 'Roboto-Regular',
+    fontSize: 14,
+    lineHeight: 19,
+
+    color: '#212121',
+    // backgroundColor: '#D3D3D3',
+
+    // borderTopRightRadius: 6,
+    // borderBottomRightRadius: 6,
+    // borderBottomLeftRadius: 6,
+  },
+  date: {
+    textAlign: 'right',
+    fontFamily: 'Roboto-Regular',
+    fontSize: 10,
+    lineHeight: 15,
+
+    color: '#696969',
   },
   inputContainer: {
     marginBottom: 16,

@@ -12,7 +12,9 @@ const PostsScreen = ({ navigation }) => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'posts'), data => {
-      setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      setPosts(
+        data.docs.map(doc => ({ ...doc.data(), id: doc.id })).sort((a, b) => b.time - a.time)
+      );
     });
     return () => {
       unsubscribe();

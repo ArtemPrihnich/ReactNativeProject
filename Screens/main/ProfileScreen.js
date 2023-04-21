@@ -19,13 +19,15 @@ import MapPin from '../../assets/images/map-pin.svg';
 
 const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
-  const { userId } = useSelector(state => state.auth);
+  const { userId, nickName } = useSelector(state => state.auth);
 
   const q = query(collection(db, 'posts'), where('userId', '==', userId));
 
   useEffect(() => {
     const unsubscribe = onSnapshot(q, data => {
-      setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      setPosts(
+        data.docs.map(doc => ({ ...doc.data(), id: doc.id })).sort((a, b) => b.time - a.time)
+      );
     });
     return () => {
       unsubscribe();
@@ -44,7 +46,7 @@ const ProfileScreen = ({ navigation }) => {
           <LogoutButton />
         </View>
         <View style={styles.userInfoBox}>
-          <Text style={styles.userName}>Artem Prihnich</Text>
+          <Text style={styles.userName}>{nickName}</Text>
         </View>
         <View style={styles.userPostsContainer}>
           <FlatList
@@ -58,7 +60,9 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.postComponentsContainer}>
                   <TouchableOpacity
                     style={styles.componentContainer}
-                    onPress={() => navigation.navigate('Comments', { postId: item.id })}
+                    onPress={() =>
+                      navigation.navigate('Comments', { postId: item.id, photo: item.photo })
+                    }
                   >
                     <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
                   </TouchableOpacity>

@@ -8,6 +8,9 @@ import { store } from './redux/store';
 
 import Main from './components/Main';
 
+import 'intl';
+import 'intl/locale-data/jsonp/ru-UA';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {

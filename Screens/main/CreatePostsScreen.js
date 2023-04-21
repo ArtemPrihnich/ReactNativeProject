@@ -70,6 +70,7 @@ const CreatePostsScreen = ({ navigation }) => {
       location,
       userId,
       nickName,
+      time: Date.now(),
     });
   };
 
