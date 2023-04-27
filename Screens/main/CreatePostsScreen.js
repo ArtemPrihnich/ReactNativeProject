@@ -24,6 +24,7 @@ import CameraElement from '../../components/CameraElement';
 
 const CreatePostsScreen = ({ navigation }) => {
   const [photo, setPhoto] = useState(null);
+  console.log(photo);
   const [location, setLocation] = useState(null);
   const [locationState, setLocationState] = useState(false);
 
@@ -31,16 +32,16 @@ const CreatePostsScreen = ({ navigation }) => {
 
   const CreatePostSchema = Yup.object().shape({
     title: Yup.string()
-      .min(3, 'Минимальная длина названия 3')
-      .max(20, 'Максимальная длина названия 20')
-      .required('Required'),
+      .min(3, 'Минимальная длина названия 3 символа!')
+      .max(20, 'Максимальная длина названия 20 символов!')
+      .required('Обязательное поле'),
     locationName: Yup.string()
-      .max(40, 'Максимальная длина местоположения 40')
+      .max(40, 'Максимальная длина местоположения 40 символов!')
       .matches(
         /^[А-ЯA-Z]{1}[а-яa-z]{1,20}[-]{0,1}[А-ЯA-Z]{0,1}[а-яa-z]{0,10}[,]{1} [А-ЯA-Z]{1}[а-яa-z]{1,20}$/,
         'Введите местоположение в формате Регион, Страна'
       )
-      .required('Required'),
+      .required('Обязательное поле'),
   });
 
   const writePhoto = data => setPhoto(data);
@@ -49,6 +50,7 @@ const CreatePostsScreen = ({ navigation }) => {
   const uploadPhotoToServer = async () => {
     try {
       const responce = await fetch(photo);
+      console.log(responce);
       const file = await responce.blob();
       const uniquePhotoId = uuidv4();
 

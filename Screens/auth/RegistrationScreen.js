@@ -5,68 +5,72 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
+  Image,
   ImageBackground,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useKeyboard } from '../../utils/keyboardActive';
-import AddImage from '../../assets/images/add-image.svg';
+import PlusIcon from '../../assets/images/plus-icon.svg';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { authSignUpUser } from '../../redux/auth/authOperations';
-import { useEffect } from 'react';
 
 const RegistrationScreen = ({ navigation }) => {
-  const [keyboardIsVisible, setKeyboardIsVisible] = useState(false);
-  console.log(keyboardIsVisible);
   const [isActiveLoginInput, setIsActiveLoginInput] = useState(false);
   const [isActiveEmailInput, setIsActiveEmailInput] = useState(false);
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
 
+  const [userPhoto, setUserPhoto] = useState(null);
+
   const dispatch = useDispatch();
 
   const keyboardHeight = useKeyboard();
-  console.log(keyboardHeight);
 
   const onSubmitClick = (values, formik) => {
-    dispatch(authSignUpUser(values));
-    console.log(values);
+    const userInfo = {
+      ...values,
+      userPhoto,
+    };
+    dispatch(authSignUpUser(userInfo));
     formik.resetForm();
     Keyboard.dismiss();
   };
 
+  const addUserPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+    }
+
+    const userPhoto = await ImagePicker.launchImageLibraryAsync();
+    if (userPhoto.canceled) {
+      return;
+    }
+    setUserPhoto(userPhoto.assets[0].uri);
+  };
+
+  const deleteUserPhoto = async () => {
+    try {
+      setUserPhoto(null);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   const SignupSchema = Yup.object().shape({
     login: Yup.string()
-      .min(3, 'Min login length 3!')
-      .max(20, 'Max login length 20!')
-      .required('Required'),
-    email: Yup.string().email('Invalid email').required('Required'),
+      .min(3, 'Минимальная длина логина 3 символа!')
+      .max(20, 'Максимальная длина логина 30 символов!')
+      .required('Обязательное поле'),
+    email: Yup.string().email('Невалидная почта').required('Обязательное поле'),
     password: Yup.string()
-      .min(8, 'Min password length 8!')
-      .max(30, 'Max password length 30!')
-      .required('Required'),
+      .min(8, 'Минимальная длина пароля 8 символов!')
+      .max(30, 'Максимальная длина пароля 30 символов!')
+      .required('Обязательное поле'),
   });
-
-  // useEffect(() => {
-  //   const showSubscription = Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
-  //   const hideSubscription = Keyboard.addListener('keyboardDidHide', onKeyboardDidHide);
-
-  //   function onKeyboardDidShow() {
-  //     setKeyboardIsVisible(true);
-  //   }
-
-  //   function onKeyboardDidHide() {
-  //     setKeyboardIsVisible(false);
-  //   }
-
-  //   return () => {
-  //     showSubscription.remove();
-  //     hideSubscription.remove();
-  //   };
-  // }, []);
 
   return (
     <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
@@ -84,9 +88,26 @@ const RegistrationScreen = ({ navigation }) => {
         {({ values, errors, touched, handleChange, setFieldTouched, isValid, handleSubmit }) => (
           <View style={{ ...styles.form, marginBottom: keyboardHeight ? -186 : 0 }}>
             <View style={styles.imgBox}>
-              <TouchableOpacity style={styles.addImgBtn}>
-                <AddImage width={25} height={25} />
-              </TouchableOpacity>
+              <Image
+                style={{ flex: 1, resizeMode: 'contain', borderRadius: 16 }}
+                source={{ uri: userPhoto }}
+              />
+              {!userPhoto && (
+                <TouchableOpacity style={styles.buttonBox} onPress={addUserPhoto}>
+                  <PlusIcon width={25} height={25} fill="#FF6C00" />
+                </TouchableOpacity>
+              )}
+              {userPhoto && (
+                <TouchableOpacity
+                  style={{
+                    ...styles.buttonBox,
+                    transform: [{ rotate: '45deg' }],
+                  }}
+                  onPress={deleteUserPhoto}
+                >
+                  <PlusIcon width={25} height={25} fill="#BDBDBD" />
+                </TouchableOpacity>
+              )}
             </View>
             <Text style={styles.title}>Регистрация</Text>
             <View style={styles.box}>
@@ -176,6 +197,7 @@ const RegistrationScreen = ({ navigation }) => {
               <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
                 <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
               </TouchableOpacity>
+              {/* <Button title="test" onPress={uploadUserPhoto}></Button> */}
             </View>
           </View>
         )}
@@ -203,7 +225,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
     borderRadius: 16,
   },
-  addImgBtn: {
+  buttonBox: {
     position: 'absolute',
     bottom: 14,
     right: -12.5,

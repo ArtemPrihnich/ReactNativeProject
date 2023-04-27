@@ -8,18 +8,22 @@ import {
   Image,
   FlatList,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import LogoutButton from '../../components/LogoutButton';
-import AddImage from '../../assets/images/add-image.svg';
-import { db, auth } from '../../firebase/config';
+import PlusIcon from '../../assets/images/plus-icon.svg';
+import { db, cloudStorage } from '../../firebase/config';
+import { ref, deleteObject } from 'firebase/storage';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { changeUserPhoto, uploadUserPhoto } from '../../redux/auth/authOperations';
 
 import MessageIcon from '../../assets/images/message-icon.svg';
 import MapPin from '../../assets/images/map-pin.svg';
 
 const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
-  const { userId, nickName } = useSelector(state => state.auth);
+  const { userId, nickName, userPhoto } = useSelector(state => state.auth);
+  const dispatch = useDispatch();
 
   const q = query(collection(db, 'posts'), where('userId', '==', userId));
 
@@ -34,13 +38,57 @@ const ProfileScreen = ({ navigation }) => {
     };
   }, []);
 
+  const addUserPhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+      }
+      const userPhoto = await ImagePicker.launchImageLibraryAsync();
+      if (userPhoto.canceled) {
+        return;
+      }
+      const processedUserPhoto = await uploadUserPhoto(userPhoto.assets[0].uri, userId);
+      dispatch(changeUserPhoto(processedUserPhoto));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const deleteUserPhoto = async () => {
+    try {
+      const photoRef = ref(cloudStorage, `usersPhoto/${userId}`);
+      await deleteObject(photoRef);
+      dispatch(changeUserPhoto(null));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
       <View style={styles.profileContainer}>
         <View style={styles.imgBox}>
-          <TouchableOpacity style={styles.addImgBtn}>
-            <AddImage width={25} height={25} />
-          </TouchableOpacity>
+          <Image
+            style={{ flex: 1, resizeMode: 'contain', borderRadius: 16 }}
+            source={{ uri: userPhoto }}
+          />
+          {!userPhoto && (
+            <TouchableOpacity style={styles.buttonBox} onPress={addUserPhoto}>
+              <PlusIcon width={25} height={25} fill="#FF6C00" />
+            </TouchableOpacity>
+          )}
+          {userPhoto && (
+            <TouchableOpacity
+              style={{
+                ...styles.buttonBox,
+                transform: [{ rotate: '45deg' }],
+              }}
+              onPress={deleteUserPhoto}
+            >
+              <PlusIcon width={25} height={25} fill="#BDBDBD" />
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.logoutBtnBox}>
           <LogoutButton />
@@ -120,7 +168,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
     borderRadius: 16,
   },
-  addImgBtn: {
+  buttonBox: {
     position: 'absolute',
     bottom: 14,
     right: -12.5,

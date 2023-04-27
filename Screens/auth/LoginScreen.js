@@ -10,7 +10,6 @@ import {
   Keyboard,
   ImageBackground,
 } from 'react-native';
-// import { useKeyboard } from '../../utils/keyboardActive';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
@@ -23,17 +22,15 @@ const LoginScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  // const keyboardHeight = useKeyboard(0);
-
   const LoginSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email').required('Required'),
+    email: Yup.string().email('Невалидная почта').required('Обязательное поле'),
     password: Yup.string()
-      .min(8, 'Min password length 8!')
-      .max(30, 'Max password length 30!')
-      .required('Required'),
+      .min(8, 'Минимальная длина пароля 8 символов!')
+      .max(30, 'Максимальная длина пароля 30 символов!')
+      .required('Обязательное поле'),
   });
 
-  const onSubmitClick = (values, formik) => {
+  const onSubmitClick = async (values, formik) => {
     dispatch(authSignInUser(values));
     console.log(values);
     formik.resetForm();
