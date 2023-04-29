@@ -5,6 +5,7 @@ const initState = {
   userPhoto: null,
   nickName: null,
   stateChange: false,
+  isLoading: false,
 };
 
 export const authSlice = createSlice({
@@ -30,6 +31,10 @@ export const authSlice = createSlice({
     updateUserPhoto: (state, { payload }) => ({
       ...state,
       userPhoto: payload.userPhoto,
+    }),
+    setLoadingState: (state, { payload }) => ({
+      ...state,
+      isLoading: payload.isLoading,
     }),
   },
 });

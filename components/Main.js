@@ -6,6 +6,7 @@ import { useRoute } from '../utils/router';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { authStateChangeUser } from '../redux/auth/authOperations';
+import { ToastProvider } from 'react-native-toast-notifications';
 
 const Main = () => {
   const { stateChange } = useSelector(state => state.auth);
@@ -17,9 +18,11 @@ const Main = () => {
 
   const routing = useRoute(stateChange);
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <NavigationContainer>{routing}</NavigationContainer>
-    </TouchableWithoutFeedback>
+    <ToastProvider offsetTop={50} duration={2000}>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <NavigationContainer>{routing}</NavigationContainer>
+      </TouchableWithoutFeedback>
+    </ToastProvider>
   );
 };
 

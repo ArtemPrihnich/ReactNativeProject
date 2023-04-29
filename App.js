@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { store } from './redux/store';
 
 import Main from './components/Main';
+// import { ToastProvider } from 'react-native-toast-notifications';
 
 import 'intl';
 import 'intl/locale-data/jsonp/ru-UA';
@@ -30,11 +31,13 @@ export default function App() {
   }
 
   return (
+    // <ToastProvider>
     <Provider store={store}>
       <View style={styles.container} onLayout={onLayoutRootView}>
         <Main />
       </View>
     </Provider>
+    // </ToastProvider>
   );
 }
 

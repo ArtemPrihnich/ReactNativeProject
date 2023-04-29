@@ -8,24 +8,29 @@ import {
   Keyboard,
   Image,
   ImageBackground,
+  ActivityIndicator,
+  Button,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useKeyboard } from '../../utils/keyboardActive';
 import PlusIcon from '../../assets/images/plus-icon.svg';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { authSignUpUser } from '../../redux/auth/authOperations';
+import { useToast } from 'react-native-toast-notifications';
 
 const RegistrationScreen = ({ navigation }) => {
   const [isActiveLoginInput, setIsActiveLoginInput] = useState(false);
   const [isActiveEmailInput, setIsActiveEmailInput] = useState(false);
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
-
   const [userPhoto, setUserPhoto] = useState(null);
 
+  const { isLoading } = useSelector(state => state.auth);
+
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const keyboardHeight = useKeyboard();
 
@@ -33,6 +38,7 @@ const RegistrationScreen = ({ navigation }) => {
     const userInfo = {
       ...values,
       userPhoto,
+      toast,
     };
     dispatch(authSignUpUser(userInfo));
     formik.resetForm();
@@ -58,6 +64,13 @@ const RegistrationScreen = ({ navigation }) => {
     } catch (error) {
       console.log(error.message);
     }
+  };
+
+  const showToast = () => {
+    toast.show('Hello World', {
+      placement: 'top',
+      type: 'danger',
+    });
   };
 
   const SignupSchema = Yup.object().shape({
@@ -185,19 +198,27 @@ const RegistrationScreen = ({ navigation }) => {
                 )}
               </View>
               <TouchableOpacity
-                style={{ ...styles.button, backgroundColor: isValid ? '#FF6C00' : '#F6F6F6' }}
-                disabled={!isValid}
+                style={{
+                  ...styles.button,
+                  backgroundColor: (isLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
+                }}
+                disabled={!isValid || isLoading}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
               >
-                <Text style={{ ...styles.buttonText, color: isValid ? '#FFFFFF' : '#BDBDBD' }}>
+                <Text
+                  style={{
+                    ...styles.buttonText,
+                    color: (isLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
+                  }}
+                >
                   Зарегистрироваться
                 </Text>
+                {isLoading && <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />}
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
                 <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
               </TouchableOpacity>
-              {/* <Button title="test" onPress={uploadUserPhoto}></Button> */}
             </View>
           </View>
         )}
@@ -297,11 +318,14 @@ const styles = StyleSheet.create({
     color: '#1B4371',
   },
   button: {
+    justifyContent: 'center',
+    flexDirection: 'row',
+
     marginTop: 27,
     marginBottom: 16,
     paddingTop: 16,
     paddingBottom: 16,
-    alignItems: 'center',
+    // alignItems: 'center',
     borderRadius: 100,
   },
   buttonText: {

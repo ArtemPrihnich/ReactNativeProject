@@ -6,9 +6,8 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -21,14 +20,17 @@ import { v4 as uuidv4 } from 'uuid';
 import MapPin from '../../assets/images/map-pin.svg';
 import TrashIcon from '../../assets/images/trash-icon.svg';
 import CameraElement from '../../components/CameraElement';
+import { useToast } from 'react-native-toast-notifications';
 
 const CreatePostsScreen = ({ navigation }) => {
   const [photo, setPhoto] = useState(null);
-  console.log(photo);
   const [location, setLocation] = useState(null);
   const [locationState, setLocationState] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { userId, nickName } = useSelector(state => state.auth);
+
+  const toast = useToast();
 
   const CreatePostSchema = Yup.object().shape({
     title: Yup.string()
@@ -60,34 +62,52 @@ const CreatePostsScreen = ({ navigation }) => {
 
       return processedPhoto;
     } catch (error) {
-      console.log(error.message);
+      toast.show('Что-то пошло не так, мы не смогли загрузить вашу фотографию', {
+        placement: 'top',
+        type: 'danger',
+      });
+      return error;
     }
   };
 
   const uploadPostToServer = async (processedPhoto, title, locationName) => {
-    await addDoc(collection(db, 'posts'), {
-      photo: processedPhoto,
-      title,
-      locationName,
-      location,
-      userId,
-      nickName,
-      time: Date.now(),
-    });
+    try {
+      await addDoc(collection(db, 'posts'), {
+        photo: processedPhoto,
+        title,
+        locationName,
+        location,
+        userId,
+        nickName,
+        time: Date.now(),
+      });
+    } catch (error) {
+      toast.show('Что-то пошло не так, мы не смогли загрузить ваш пост', {
+        placement: 'top',
+        type: 'danger',
+      });
+      return error;
+    }
   };
 
   const sendPosts = async (values, formik) => {
     try {
+      setIsLoading(true);
       const { title, locationName } = values;
       const processedPhoto = await uploadPhotoToServer();
-      await uploadPostToServer(processedPhoto, title, locationName);
+      console.log(processedPhoto);
+      const uploadPost = await uploadPostToServer(processedPhoto, title, locationName);
 
-      navigation.navigate('Posts');
-      formik.resetForm();
-      setPhoto(null);
-      setLocation(null);
+      if (!processedPhoto || !uploadPost) {
+        navigation.navigate('Posts');
+        formik.resetForm();
+        setPhoto(null);
+        setLocation(null);
+        setIsLoading(false);
+      }
+      setIsLoading(false);
     } catch (error) {
-      console.log(error.message);
+      setIsLoading(false);
     }
   };
 
@@ -170,19 +190,24 @@ const CreatePostsScreen = ({ navigation }) => {
                 <TouchableOpacity
                   style={{
                     ...styles.button,
-                    backgroundColor: !locationState && isValid ? '#FF6C00' : '#F6F6F6',
+                    backgroundColor:
+                      isLoading || (!locationState && !isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
                   }}
-                  disabled={!isValid || locationState}
+                  disabled={isLoading || !isValid || locationState}
                   onPress={handleSubmit}
                 >
                   <Text
                     style={{
                       ...styles.buttonText,
-                      color: !locationState && isValid ? '#FFFFFF' : '#BDBDBD',
+                      color:
+                        isLoading || (!locationState && !isValid) || !isValid
+                          ? '#BDBDBD'
+                          : '#FFFFFF',
                     }}
                   >
                     {!locationState ? 'Опубликовать' : 'Записываем геолокацию...'}
                   </Text>
+                  {isLoading && <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />}
                 </TouchableOpacity>
               </View>
               {/* </KeyboardAvoidingView> */}
@@ -264,6 +289,9 @@ const styles = StyleSheet.create({
     transform: [{ translateY: 1 }],
   },
   button: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+
     paddingVertical: 16,
     marginTop: 32,
     backgroundColor: '#FF6C00',

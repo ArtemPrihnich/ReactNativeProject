@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import LogoutButton from '../../components/LogoutButton';
@@ -22,7 +23,7 @@ import MapPin from '../../assets/images/map-pin.svg';
 
 const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
-  const { userId, nickName, userPhoto } = useSelector(state => state.auth);
+  const { userId, nickName, userPhoto, isLoading } = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
   const q = query(collection(db, 'posts'), where('userId', '==', userId));
@@ -48,8 +49,9 @@ const ProfileScreen = ({ navigation }) => {
       if (userPhoto.canceled) {
         return;
       }
-      const processedUserPhoto = await uploadUserPhoto(userPhoto.assets[0].uri, userId);
-      dispatch(changeUserPhoto(processedUserPhoto));
+      const photoPath = userPhoto.assets[0].uri;
+      // const processedUserPhoto = await uploadUserPhoto(userPhoto.assets[0].uri, userId);
+      dispatch(changeUserPhoto(photoPath));
     } catch (error) {
       console.log(error.message);
     }
@@ -57,8 +59,8 @@ const ProfileScreen = ({ navigation }) => {
 
   const deleteUserPhoto = async () => {
     try {
-      const photoRef = ref(cloudStorage, `usersPhoto/${userId}`);
-      await deleteObject(photoRef);
+      // const photoRef = ref(cloudStorage, `usersPhoto/${userId}`);
+      // await deleteObject(photoRef);
       dispatch(changeUserPhoto(null));
     } catch (error) {
       console.log(error.message);
@@ -66,11 +68,16 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
+    <ImageBackground style={styles.bgImage} source={require('../../assets/images/bgImage.jpg')}>
       <View style={styles.profileContainer}>
         <View style={styles.imgBox}>
+          {isLoading && (
+            <View style={styles.loaderBox}>
+              <ActivityIndicator size={60} color="#FF6C00" />
+            </View>
+          )}
           <Image
-            style={{ flex: 1, resizeMode: 'contain', borderRadius: 16 }}
+            style={{ ...styles.image, opacity: isLoading ? 0.5 : 1 }}
             source={{ uri: userPhoto }}
           />
           {!userPhoto && (
@@ -144,7 +151,7 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
     // alignItems: 'center',
   },
-  image: {
+  bgImage: {
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'flex-start',
@@ -159,6 +166,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
   },
   imgBox: {
+    alignContent: 'center',
     position: 'absolute',
     top: -60,
     left: '50%',
@@ -166,6 +174,18 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     backgroundColor: '#F6F6F6',
+    borderRadius: 16,
+  },
+  loaderBox: {
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  image: {
+    flex: 1,
+    resizeMode: 'contain',
     borderRadius: 16,
   },
   buttonBox: {

@@ -7,9 +7,10 @@ import {
 } from 'firebase/auth';
 import { auth, cloudStorage } from '../../firebase/config';
 import { authSlice } from './authReducer';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes, deleteObject } from 'firebase/storage';
 
-const { updateUserProfile, authSignOut, authStateChange, updateUserPhoto } = authSlice.actions;
+const { updateUserProfile, authSignOut, authStateChange, updateUserPhoto, setLoadingState } =
+  authSlice.actions;
 
 export const uploadUserPhoto = async (photo, id) => {
   try {
@@ -20,14 +21,17 @@ export const uploadUserPhoto = async (photo, id) => {
     const processedPhoto = await getDownloadURL(ref(storageRef));
     return processedPhoto;
   } catch (error) {
+    console.log(error);
     console.log(error.message);
   }
 };
 
 export const authSignUpUser =
-  ({ email, login, password, userPhoto }) =>
+  ({ email, login, password, userPhoto, toast }) =>
   async (dispatch, getState) => {
+    // const toast = useToast();
     try {
+      dispatch(setLoadingState({ isLoading: true }));
       await createUserWithEmailAndPassword(auth, email, password);
       const { uid } = auth.currentUser;
       if (userPhoto) {
@@ -37,39 +41,88 @@ export const authSignUpUser =
           photoURL: photo,
         });
         dispatch(updateUserProfile({ userId: uid, nickName: login, userPhoto: photo }));
+        dispatch(setLoadingState({ isLoading: false }));
+        toast.show('Succes', {
+          placement: 'top',
+          type: 'success',
+        });
         return;
       }
       await updateProfile(auth.currentUser, {
         displayName: login,
       });
       dispatch(updateUserProfile({ userId: uid, nickName: login, userPhoto: null }));
+      dispatch(setLoadingState({ isLoading: false }));
+      toast.show('Succes', {
+        placement: 'top',
+        type: 'success',
+      });
     } catch (error) {
-      console.log('error', error);
-      console.log('error.message', error.message);
+      dispatch(setLoadingState({ isLoading: false }));
+      if (error.code === 'auth/email-already-in-use') {
+        return toast.show(`Данная почта уже используется`, {
+          placement: 'top',
+          type: 'danger',
+        });
+      }
+      if (error.code === 'auth/invalid-email') {
+        return toast.show(`Не валидная почта`, {
+          placement: 'top',
+          type: 'danger',
+        });
+      }
+      toast.show(`Что-то пошло не так, попробуйте ещё раз`, {
+        placement: 'top',
+        type: 'danger',
+      });
     }
   };
 
 export const authSignInUser =
-  ({ email, password }) =>
+  ({ email, password, toast }) =>
   async (dispatch, getState) => {
     try {
-      const user = await signInWithEmailAndPassword(auth, email, password);
-      // console.log(user);
+      dispatch(setLoadingState({ isLoading: true }));
+      await signInWithEmailAndPassword(auth, email, password);
+      dispatch(setLoadingState({ isLoading: false }));
     } catch (error) {
-      console.log('error', error);
+      dispatch(setLoadingState({ isLoading: false }));
+      if (error.code === 'auth/user-not-found') {
+        return toast.show('Пользователь не найден, проверьте введённые данные', {
+          placement: 'top',
+          type: 'danger',
+        });
+      }
+      if (error.code === 'auth/wrong-password') {
+        return toast.show('Неверная почта или пароль', {
+          placement: 'top',
+          type: 'danger',
+        });
+      }
+      toast.show(`Что-то пошло не так, попробуйте ещё раз`, {
+        placement: 'top',
+        type: 'danger',
+      });
+      console.log(error.code);
       console.log('error.message', error.message);
     }
   };
 
-export const authLogOutUser = () => async (dispatch, getState) => {
-  try {
-    await signOut(auth);
-    dispatch(authSignOut({ stateChange: false }));
-  } catch (error) {
-    console.log('error', error);
-    console.log('error.message', error.message);
-  }
-};
+export const authLogOutUser =
+  ({ toast }) =>
+  async (dispatch, getState) => {
+    try {
+      await signOut(auth);
+      dispatch(authSignOut({ stateChange: false }));
+    } catch (error) {
+      toast.show('Что-то пошло не так, мы не смогли вас разлогинить.', {
+        placement: 'top',
+        type: 'danger',
+      });
+      console.log('error', error);
+      console.log('error.message', error.message);
+    }
+  };
 
 export const authStateChangeUser = () => async (dispatch, getState) => {
   try {
@@ -94,19 +147,25 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
 
 export const changeUserPhoto = photo => async (dispatch, getState) => {
   try {
-    const { photoURL } = auth.currentUser;
+    dispatch(setLoadingState({ isLoading: true }));
+    const { photoURL, userId } = auth.currentUser;
     if (photo) {
+      await uploadUserPhoto(photo, userId);
       await updateProfile(auth.currentUser, {
         photoURL: photo,
       });
       dispatch(updateUserPhoto({ userPhoto: photoURL }));
+      dispatch(setLoadingState({ isLoading: false }));
       return;
     }
+    await deleteObject(ref(cloudStorage, `usersPhoto/${userId}`));
     await updateProfile(auth.currentUser, {
       photoURL: null,
     });
     dispatch(updateUserPhoto({ userPhoto: null }));
+    dispatch(setLoadingState({ isLoading: false }));
   } catch (error) {
+    dispatch(setLoadingState({ isLoading: false }));
     console.log(error.message);
   }
 };

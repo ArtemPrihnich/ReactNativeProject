@@ -9,18 +9,23 @@ import {
   Platform,
   Keyboard,
   ImageBackground,
+  ActivityIndicator,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { authSignInUser } from '../../redux/auth/authOperations';
+import { useToast } from 'react-native-toast-notifications';
 
 const LoginScreen = ({ navigation }) => {
   const [isActiveEmailInput, setIsActiveEmailInput] = useState(false);
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
 
+  const { isLoading } = useSelector(state => state.auth);
+
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Невалидная почта').required('Обязательное поле'),
@@ -31,7 +36,11 @@ const LoginScreen = ({ navigation }) => {
   });
 
   const onSubmitClick = async (values, formik) => {
-    dispatch(authSignInUser(values));
+    const userInfo = {
+      ...values,
+      toast,
+    };
+    dispatch(authSignInUser(userInfo));
     console.log(values);
     formik.resetForm();
     Keyboard.dismiss();
@@ -104,14 +113,23 @@ const LoginScreen = ({ navigation }) => {
                   )}
                 </View>
                 <TouchableOpacity
-                  style={{ ...styles.button, backgroundColor: isValid ? '#FF6C00' : '#F6F6F6' }}
+                  style={{
+                    ...styles.button,
+                    backgroundColor: (isLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
+                  }}
                   disabled={!isValid}
                   onPress={handleSubmit}
                   activeOpacity={0.7}
                 >
-                  <Text style={{ ...styles.buttonText, color: isValid ? '#FFFFFF' : '#BDBDBD' }}>
+                  <Text
+                    style={{
+                      ...styles.buttonText,
+                      color: (isLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
+                    }}
+                  >
                     Войти
                   </Text>
+                  {isLoading && <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />}
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Register')}
@@ -200,6 +218,9 @@ const styles = StyleSheet.create({
     color: '#1B4371',
   },
   button: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+
     marginTop: 27,
     marginBottom: 16,
     paddingTop: 16,
