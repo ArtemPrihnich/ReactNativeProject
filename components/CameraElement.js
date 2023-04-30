@@ -5,7 +5,7 @@ import { Text, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react
 import CameraIcon from '../assets/images/camera-icon.svg';
 import TrashIcon from '../assets/images/trash-icon.svg';
 
-const CameraElement = ({ writePhoto, writeLocation, photo, location, setLocationState }) => {
+const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) => {
   const [locationPermission, locationRequestPermission] = Location.useForegroundPermissions();
   const [cameraPermission, cameraRequestPermission] = Camera.useCameraPermissions();
   const [camera, setCamera] = useState(null);

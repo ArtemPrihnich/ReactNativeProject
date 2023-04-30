@@ -17,6 +17,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeUserPhoto, uploadUserPhoto } from '../../redux/auth/authOperations';
+import { useToast } from 'react-native-toast-notifications';
 
 import MessageIcon from '../../assets/images/message-icon.svg';
 import MapPin from '../../assets/images/map-pin.svg';
@@ -25,6 +26,7 @@ const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const { userId, nickName, userPhoto, isLoading } = useSelector(state => state.auth);
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const q = query(collection(db, 'posts'), where('userId', '==', userId));
 
@@ -50,8 +52,7 @@ const ProfileScreen = ({ navigation }) => {
         return;
       }
       const photoPath = userPhoto.assets[0].uri;
-      // const processedUserPhoto = await uploadUserPhoto(userPhoto.assets[0].uri, userId);
-      dispatch(changeUserPhoto(photoPath));
+      dispatch(changeUserPhoto(photoPath, toast));
     } catch (error) {
       console.log(error.message);
     }
@@ -59,9 +60,7 @@ const ProfileScreen = ({ navigation }) => {
 
   const deleteUserPhoto = async () => {
     try {
-      // const photoRef = ref(cloudStorage, `usersPhoto/${userId}`);
-      // await deleteObject(photoRef);
-      dispatch(changeUserPhoto(null));
+      dispatch(changeUserPhoto(null, toast));
     } catch (error) {
       console.log(error.message);
     }

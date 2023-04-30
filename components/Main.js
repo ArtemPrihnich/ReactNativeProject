@@ -1,4 +1,4 @@
-import { TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { TouchableWithoutFeedback, Keyboard, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect } from 'react';
 
@@ -9,7 +9,7 @@ import { authStateChangeUser } from '../redux/auth/authOperations';
 import { ToastProvider } from 'react-native-toast-notifications';
 
 const Main = () => {
-  const { stateChange } = useSelector(state => state.auth);
+  const { stateChange, isLoading } = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -17,6 +17,7 @@ const Main = () => {
   }, []);
 
   const routing = useRoute(stateChange);
+
   return (
     <ToastProvider offsetTop={50} duration={2000}>
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

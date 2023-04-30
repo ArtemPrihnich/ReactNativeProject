@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Text,
@@ -92,6 +92,7 @@ const CreatePostsScreen = ({ navigation }) => {
 
   const sendPosts = async (values, formik) => {
     try {
+      console.log(values);
       setIsLoading(true);
       const { title, locationName } = values;
       const processedPhoto = await uploadPhotoToServer();
@@ -101,6 +102,7 @@ const CreatePostsScreen = ({ navigation }) => {
       if (!processedPhoto || !uploadPost) {
         navigation.navigate('Posts');
         formik.resetForm();
+        formik.validateForm();
         setPhoto(null);
         setLocation(null);
         setIsLoading(false);
@@ -111,8 +113,9 @@ const CreatePostsScreen = ({ navigation }) => {
     }
   };
 
-  const clearButton = resetForm => {
+  const clearButton = (resetForm, validateForm) => {
     resetForm();
+    validateForm();
     setPhoto(null);
     setLocation(null);
   };
@@ -125,7 +128,7 @@ const CreatePostsScreen = ({ navigation }) => {
           locationName: '',
         }}
         validationSchema={CreatePostSchema}
-        validateOnMount
+        validateOnMount="true"
         onSubmit={(values, formik) => sendPosts(values, formik)}
       >
         {({
@@ -137,6 +140,7 @@ const CreatePostsScreen = ({ navigation }) => {
           handleChange,
           handleSubmit,
           resetForm,
+          validateForm,
         }) => (
           <View style={{ flex: 1 }}>
             {/* <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'position'}> */}
@@ -152,7 +156,7 @@ const CreatePostsScreen = ({ navigation }) => {
                   />
                 </View>
                 <Text style={styles.photoBoxLabel}>
-                  {photo ? 'Редактировать фото' : 'Загрузить фото'}
+                  {photo ? 'Редактировать фото' : 'Загрузить фото (Обязательно)'}
                 </Text>
                 <View style={styles.inputContainer}>
                   <TextInput
@@ -191,16 +195,18 @@ const CreatePostsScreen = ({ navigation }) => {
                   style={{
                     ...styles.button,
                     backgroundColor:
-                      isLoading || (!locationState && !isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
+                      !photo || isLoading || (!locationState && !isValid) || !isValid
+                        ? '#F6F6F6'
+                        : '#FF6C00',
                   }}
-                  disabled={isLoading || !isValid || locationState}
+                  disabled={!photo || isLoading || !isValid || locationState}
                   onPress={handleSubmit}
                 >
                   <Text
                     style={{
                       ...styles.buttonText,
                       color:
-                        isLoading || (!locationState && !isValid) || !isValid
+                        !photo || isLoading || (!locationState && !isValid) || !isValid
                           ? '#BDBDBD'
                           : '#FFFFFF',
                     }}
@@ -214,7 +220,7 @@ const CreatePostsScreen = ({ navigation }) => {
               <View style={styles.deleteButtonBox}>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => clearButton(resetForm)}
+                  onPress={() => clearButton(resetForm, validateForm)}
                 >
                   <TrashIcon width={24} height={24} fill="#BDBDBD" />
                 </TouchableOpacity>

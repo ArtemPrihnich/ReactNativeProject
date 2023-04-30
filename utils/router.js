@@ -3,16 +3,26 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../Screens/auth/LoginScreen';
 import RegistrationScreen from '../Screens/auth/RegistrationScreen';
 import CommentsScreen from '../Screens/main/CommentsScreen';
-import CreatePostsScreen from '../Screens/main/CreatePostsScreen';
 import Home from '../Screens/main/Home';
 import MapScreen from '../Screens/main/MapScreen';
 import GoBackButton from '../components/GoBackButton';
-import { View } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 
 const AuthStack = createNativeStackNavigator();
 const Stack = createNativeStackNavigator();
 
 export const useRoute = isAuth => {
+  const { isLoading } = useSelector(state => state.auth);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingBox}>
+        <ActivityIndicator color="#FF6C00" size={110} />
+      </View>
+    );
+  }
+
   if (!isAuth) {
     return (
       <AuthStack.Navigator>
@@ -75,3 +85,11 @@ export const useRoute = isAuth => {
     </Stack.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

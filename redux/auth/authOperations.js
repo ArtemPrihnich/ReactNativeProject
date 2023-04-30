@@ -126,9 +126,10 @@ export const authLogOutUser =
 
 export const authStateChangeUser = () => async (dispatch, getState) => {
   try {
+    dispatch(setLoadingState({ isLoading: true }));
     await onAuthStateChanged(auth, user => {
       if (user) {
-        // console.log(user);
+        console.log(user);
         dispatch(authStateChange({ stateChange: true }));
         dispatch(
           updateUserProfile({
@@ -137,35 +138,42 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
             userPhoto: user.photoURL,
           })
         );
+        dispatch(setLoadingState({ isLoading: false }));
+        return;
       }
+      dispatch(setLoadingState({ isLoading: false }));
     });
   } catch (error) {
+    dispatch(setLoadingState({ isLoading: false }));
     console.log('error', error);
     console.log('error.message', error.message);
   }
 };
 
-export const changeUserPhoto = photo => async (dispatch, getState) => {
+export const changeUserPhoto = (photo, toast) => async (dispatch, getState) => {
   try {
     dispatch(setLoadingState({ isLoading: true }));
-    const { photoURL, userId } = auth.currentUser;
+    const { uid } = auth.currentUser;
     if (photo) {
-      await uploadUserPhoto(photo, userId);
+      await uploadUserPhoto(photo, uid);
       await updateProfile(auth.currentUser, {
         photoURL: photo,
       });
-      dispatch(updateUserPhoto({ userPhoto: photoURL }));
+      dispatch(updateUserPhoto({ userPhoto: photo }));
       dispatch(setLoadingState({ isLoading: false }));
       return;
     }
-    await deleteObject(ref(cloudStorage, `usersPhoto/${userId}`));
+    await deleteObject(ref(cloudStorage, `usersPhoto/${uid}`));
     await updateProfile(auth.currentUser, {
-      photoURL: null,
+      photoURL: '',
     });
     dispatch(updateUserPhoto({ userPhoto: null }));
     dispatch(setLoadingState({ isLoading: false }));
   } catch (error) {
     dispatch(setLoadingState({ isLoading: false }));
-    console.log(error.message);
+    toast.show('Что-то пошло не так, мы не смогли загрузить/удалить ваше фото.', {
+      placement: 'top',
+      type: 'danger',
+    });
   }
 };
