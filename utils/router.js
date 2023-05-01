@@ -8,6 +8,7 @@ import MapScreen from '../Screens/main/MapScreen';
 import GoBackButton from '../components/GoBackButton';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
+import { auth } from '../firebase/config';
 
 const AuthStack = createNativeStackNavigator();
 const Stack = createNativeStackNavigator();
@@ -15,7 +16,7 @@ const Stack = createNativeStackNavigator();
 export const useRoute = isAuth => {
   const { isLoading } = useSelector(state => state.auth);
 
-  if (isLoading) {
+  if (isLoading && !auth.currentUser) {
     return (
       <View style={styles.loadingBox}>
         <ActivityIndicator color="#FF6C00" size={110} />

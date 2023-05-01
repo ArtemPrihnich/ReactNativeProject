@@ -1,7 +1,14 @@
 import { Camera, CameraType } from 'expo-camera';
 import * as Location from 'expo-location';
-import React, { useState } from 'react';
-import { Text, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  ImageBackground,
+  ActivityIndicator,
+} from 'react-native';
 import CameraIcon from '../assets/images/camera-icon.svg';
 import TrashIcon from '../assets/images/trash-icon.svg';
 
@@ -17,8 +24,8 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
 
   if (!cameraPermission) {
     return (
-      <View>
-        <Text>Loading...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#D3D3D3' }}>
+        <ActivityIndicator size={50} color="#FF6C00" />
       </View>
     );
   }

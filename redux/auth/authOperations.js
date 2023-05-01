@@ -9,8 +9,14 @@ import { auth, cloudStorage } from '../../firebase/config';
 import { authSlice } from './authReducer';
 import { getDownloadURL, ref, uploadBytes, deleteObject } from 'firebase/storage';
 
-const { updateUserProfile, authSignOut, authStateChange, updateUserPhoto, setLoadingState } =
-  authSlice.actions;
+const {
+  updateUserProfile,
+  authSignOut,
+  authStateChange,
+  updateUserPhoto,
+  setLoadingState,
+  setUserLoadingState,
+} = authSlice.actions;
 
 export const uploadUserPhoto = async (photo, id) => {
   try {
@@ -29,9 +35,8 @@ export const uploadUserPhoto = async (photo, id) => {
 export const authSignUpUser =
   ({ email, login, password, userPhoto, toast }) =>
   async (dispatch, getState) => {
-    // const toast = useToast();
     try {
-      dispatch(setLoadingState({ isLoading: true }));
+      dispatch(setUserLoadingState({ isUserLoading: true }));
       await createUserWithEmailAndPassword(auth, email, password);
       const { uid } = auth.currentUser;
       if (userPhoto) {
@@ -41,24 +46,16 @@ export const authSignUpUser =
           photoURL: photo,
         });
         dispatch(updateUserProfile({ userId: uid, nickName: login, userPhoto: photo }));
-        dispatch(setLoadingState({ isLoading: false }));
-        toast.show('Succes', {
-          placement: 'top',
-          type: 'success',
-        });
+        dispatch(setUserLoadingState({ isUserLoading: false }));
         return;
       }
       await updateProfile(auth.currentUser, {
         displayName: login,
       });
       dispatch(updateUserProfile({ userId: uid, nickName: login, userPhoto: null }));
-      dispatch(setLoadingState({ isLoading: false }));
-      toast.show('Succes', {
-        placement: 'top',
-        type: 'success',
-      });
+      dispatch(setUserLoadingState({ isUserLoading: false }));
     } catch (error) {
-      dispatch(setLoadingState({ isLoading: false }));
+      dispatch(setUserLoadingState({ isUserLoading: false }));
       if (error.code === 'auth/email-already-in-use') {
         return toast.show(`Данная почта уже используется`, {
           placement: 'top',
@@ -82,11 +79,11 @@ export const authSignInUser =
   ({ email, password, toast }) =>
   async (dispatch, getState) => {
     try {
-      dispatch(setLoadingState({ isLoading: true }));
+      dispatch(setUserLoadingState({ isUserLoading: true }));
       await signInWithEmailAndPassword(auth, email, password);
-      dispatch(setLoadingState({ isLoading: false }));
+      dispatch(setUserLoadingState({ isUserLoading: false }));
     } catch (error) {
-      dispatch(setLoadingState({ isLoading: false }));
+      dispatch(setUserLoadingState({ isUserLoading: false }));
       if (error.code === 'auth/user-not-found') {
         return toast.show('Пользователь не найден, проверьте введённые данные', {
           placement: 'top',

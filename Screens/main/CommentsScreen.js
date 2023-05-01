@@ -20,7 +20,7 @@ import UserIcon from '../../assets/images/user-icon.svg';
 const CommentsScreen = ({ route }) => {
   let flatList;
   const { postId, photo } = route.params;
-  const { nickName } = useSelector(state => state.auth);
+  const { nickName, userPhoto } = useSelector(state => state.auth);
 
   const [comment, setComment] = useState('');
   const [allComments, setAllComments] = useState([]);
@@ -33,7 +33,7 @@ const CommentsScreen = ({ route }) => {
 
   const sendComment = async () => {
     try {
-      await addDoc(commentsRef, { comment, nickName, time: Date.now() });
+      await addDoc(commentsRef, { comment, nickName, time: Date.now(), userPhoto });
       setComment('');
     } catch (error) {
       console.log(error.message);
@@ -43,7 +43,7 @@ const CommentsScreen = ({ route }) => {
   useEffect(() => {
     const unsubscribe = onSnapshot(commentsRef, data => {
       setAllComments(
-        data.docs.map(doc => ({ ...doc.data(), id: doc.id })).sort((a, b) => a.time - b.time)
+        data.docs.map(doc => ({ ...doc.data(), id: doc.id })).sort((a, b) => b.time - a.time)
       );
     });
 
@@ -64,13 +64,20 @@ const CommentsScreen = ({ route }) => {
           flatList = ref;
         }}
         keyExtractor={item => item.id}
-        onContentSizeChange={() => flatList.scrollToEnd({ animated: true })}
-        onLayout={() => flatList.scrollToEnd({ animated: false })}
+        // onContentSizeChange={() => flatList.scrollToEnd({ animated: true })}
+        // onLayout={() => flatList.scrollToEnd({ animated: false })}
+        inverted={true}
         renderItem={({ item }) => (
           <View style={styles.commentCont}>
             <View style={styles.userInfo}>
               <View style={styles.userPhotoBox}>
-                <UserIcon width={28} height={28} fill={'#BDBDBD'} />
+                {!item.userPhoto && <UserIcon width={28} height={28} fill={'#BDBDBD'} />}
+                {item.userPhoto && (
+                  <Image
+                    style={{ width: 28, height: 28, borderRadius: 50 }}
+                    source={{ uri: item.userPhoto }}
+                  />
+                )}
               </View>
               <Text style={styles.userNickName}>{item.nickName}</Text>
             </View>

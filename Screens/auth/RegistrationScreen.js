@@ -27,7 +27,7 @@ const RegistrationScreen = ({ navigation }) => {
   const [isShowPassword, setIsShowPassword] = useState(true);
   const [userPhoto, setUserPhoto] = useState(null);
 
-  const { isLoading } = useSelector(state => state.auth);
+  const { isUserLoading } = useSelector(state => state.auth);
 
   const dispatch = useDispatch();
   const toast = useToast();
@@ -200,21 +200,21 @@ const RegistrationScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={{
                   ...styles.button,
-                  backgroundColor: (isLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
+                  backgroundColor: (isUserLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
                 }}
-                disabled={!isValid || isLoading}
+                disabled={!isValid || isUserLoading}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
               >
                 <Text
                   style={{
                     ...styles.buttonText,
-                    color: (isLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
+                    color: (isUserLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
                   }}
                 >
                   Зарегистрироваться
                 </Text>
-                {isLoading && <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />}
+                {isUserLoading && <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />}
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
                 <Text style={styles.link}>Уже есть аккаунт? Войти</Text>

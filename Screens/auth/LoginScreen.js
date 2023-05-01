@@ -22,7 +22,7 @@ const LoginScreen = ({ navigation }) => {
   const [isActivePasswordInput, setIsActivePasswordInput] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(true);
 
-  const { isLoading } = useSelector(state => state.auth);
+  const { isUserLoading } = useSelector(state => state.auth);
 
   const dispatch = useDispatch();
   const toast = useToast();
@@ -115,7 +115,7 @@ const LoginScreen = ({ navigation }) => {
                 <TouchableOpacity
                   style={{
                     ...styles.button,
-                    backgroundColor: (isLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
+                    backgroundColor: (isUserLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
                   }}
                   disabled={!isValid}
                   onPress={handleSubmit}
@@ -124,12 +124,14 @@ const LoginScreen = ({ navigation }) => {
                   <Text
                     style={{
                       ...styles.buttonText,
-                      color: (isLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
+                      color: (isUserLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
                     }}
                   >
                     Войти
                   </Text>
-                  {isLoading && <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />}
+                  {isUserLoading && (
+                    <ActivityIndicator style={{ marginLeft: 10 }} color="#FF6C00" />
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Register')}
