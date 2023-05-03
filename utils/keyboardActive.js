@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 
-export const useKeyboard = () => {
-  const [keyboardHeight, setKeyboardHeight] = useState(false);
+export const useKeyboard = (hideButtons, showButtons) => {
+  const margAnim = useSharedValue(0);
+  // const [keyboardHeight, setKeyboardHeight] = useState(false);
 
   useEffect(() => {
     function onKeyboardDidShow() {
-      setKeyboardHeight(true);
+      return (margAnim.value = hideButtons);
     }
 
     function onKeyboardDidHide() {
-      setKeyboardHeight(false);
+      return (margAnim.value = showButtons);
     }
 
     const showSubscription = Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
@@ -21,5 +23,5 @@ export const useKeyboard = () => {
     };
   }, []);
 
-  return keyboardHeight;
+  return margAnim;
 };
