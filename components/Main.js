@@ -1,15 +1,13 @@
-import { TouchableWithoutFeedback, Keyboard, View, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect } from 'react';
-
-import { useRoute } from '../utils/router';
-
 import { useDispatch, useSelector } from 'react-redux';
-import { authStateChangeUser } from '../redux/auth/authOperations';
+import { NavigationContainer } from '@react-navigation/native';
 import { ToastProvider } from 'react-native-toast-notifications';
 
+import { authStateChangeUser } from '../redux/auth/authOperations';
+import { useRoute } from '../utils/router';
+
 const Main = () => {
-  const { stateChange, isLoading } = useSelector(state => state.auth);
+  const { stateChange } = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -20,18 +18,9 @@ const Main = () => {
 
   return (
     <ToastProvider offsetTop={50} duration={2000}>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <NavigationContainer>{routing}</NavigationContainer>
-      </TouchableWithoutFeedback>
+      <NavigationContainer>{routing}</NavigationContainer>
     </ToastProvider>
   );
 };
 
 export default Main;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#ffffff',
-//   },
-// });

@@ -8,7 +8,7 @@ const MapScreen = ({ route }) => {
     longitude: route.params.longitude,
   };
   return (
-    <View style={styles.container}>
+    <View style={styles.screenContainer}>
       <MapView
         style={styles.mapContainer}
         initialRegion={{
@@ -27,7 +27,7 @@ const MapScreen = ({ route }) => {
 export default MapScreen;
 
 const styles = StyleSheet.create({
-  container: {
+  screenContainer: {
     flex: 1,
   },
   mapContainer: {

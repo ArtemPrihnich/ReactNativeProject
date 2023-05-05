@@ -5,19 +5,18 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
   ImageBackground,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { authSignInUser } from '../../redux/auth/authOperations';
 import { useToast } from 'react-native-toast-notifications';
 import Animated, { useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+import { Formik } from 'formik';
+
+import { LoginSchema } from '../../schemas/authSchemas';
+import { authSignInUser } from '../../redux/auth/authOperations';
 import { useKeyboard } from '../../utils/keyboardActive';
 
 const LoginScreen = ({ navigation }) => {
@@ -26,16 +25,17 @@ const LoginScreen = ({ navigation }) => {
   const [isShowPassword, setIsShowPassword] = useState(true);
 
   const { isUserLoading } = useSelector(state => state.auth);
-
   const dispatch = useDispatch();
   const toast = useToast();
 
-  const LoginSchema = Yup.object().shape({
-    email: Yup.string().email('Невалидная почта').required('Обязательное поле'),
-    password: Yup.string()
-      .min(8, 'Минимальная длина пароля 8 символов!')
-      .max(30, 'Максимальная длина пароля 30 символов!')
-      .required('Обязательное поле'),
+  const { currenValue } = useKeyboard(-253, 0);
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      marginBottom: withTiming(currenValue.value, {
+        duration: 800,
+        easing: Easing.out(Easing.exp),
+      }),
+    };
   });
 
   const onSubmitClick = async (values, formik) => {
@@ -44,27 +44,14 @@ const LoginScreen = ({ navigation }) => {
       toast,
     };
     dispatch(authSignInUser(userInfo));
-    console.log(values);
     formik.resetForm();
     Keyboard.dismiss();
   };
 
-  const margAnim = useKeyboard(-253, 0);
-
-  const animatedStyles = useAnimatedStyle(() => {
-    return {
-      marginBottom: withTiming(margAnim.value, {
-        duration: 800,
-        easing: Easing.out(Easing.exp),
-      }),
-    };
-  });
-
   return (
     <ScrollView scrollEnabled={false} contentContainerStyle={{ flexGrow: 1 }}>
       <Animated.View style={[styles.screenContainer, animatedStyles]}>
-        <ImageBackground style={styles.image} source={require('../../assets/images/bgImage.jpg')}>
-          {/* <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}> */}
+        <ImageBackground style={styles.bgImage} source={require('../../assets/images/bgImage.jpg')}>
           <Formik
             initialValues={{
               email: '',
@@ -83,9 +70,9 @@ const LoginScreen = ({ navigation }) => {
               handleChange,
               handleSubmit,
             }) => (
-              <View style={{ ...styles.form }}>
+              <View style={{ ...styles.formContainer }}>
                 <Text style={styles.title}>Войти</Text>
-                <View style={styles.box}>
+                <View style={styles.form}>
                   <View style={styles.inputContainer}>
                     <TextInput
                       style={{
@@ -138,7 +125,7 @@ const LoginScreen = ({ navigation }) => {
                   </View>
                   <TouchableOpacity
                     style={{
-                      ...styles.button,
+                      ...styles.submitBtn,
                       backgroundColor:
                         (isUserLoading && isValid) || !isValid ? '#F6F6F6' : '#FF6C00',
                     }}
@@ -148,7 +135,7 @@ const LoginScreen = ({ navigation }) => {
                   >
                     <Text
                       style={{
-                        ...styles.buttonText,
+                        ...styles.submitBtnText,
                         color: (isUserLoading && isValid) || !isValid ? '#BDBDBD' : '#FFFFFF',
                       }}
                     >
@@ -162,13 +149,12 @@ const LoginScreen = ({ navigation }) => {
                     onPress={() => navigation.navigate('Register')}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
+                    <Text style={styles.redirect}>Нет аккаунта? Зарегистрироваться</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
           </Formik>
-          {/* </KeyboardAvoidingView> */}
         </ImageBackground>
       </Animated.View>
     </ScrollView>
@@ -181,17 +167,15 @@ const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
   },
-  image: {
+  bgImage: {
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'flex-end',
   },
-  box: {
-    marginHorizontal: 16,
-  },
-  form: {
+  formContainer: {
     paddingTop: 32,
     paddingBottom: 144,
+
     backgroundColor: '#ffffff',
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
@@ -206,6 +190,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.01,
 
     color: '#212121',
+  },
+  form: {
+    marginHorizontal: 16,
   },
   inputContainer: {
     marginBottom: 8,
@@ -237,39 +224,41 @@ const styles = StyleSheet.create({
     color: `#FF0000`,
   },
   showPassword: {
+    position: 'absolute',
     right: 16,
     top: '50%',
-    transform: [{ translateY: -9.5 }],
+
+    padding: 8,
+
+    transform: [{ translateY: -17 }],
+
     zIndex: 1,
-    position: 'absolute',
   },
   showPasswordText: {
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,
+
     color: '#1B4371',
   },
-  button: {
+  submitBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
 
     marginTop: 27,
     marginBottom: 16,
     paddingTop: 16,
     paddingBottom: 16,
-    alignItems: 'center',
-    borderRadius: 100,
 
-    // backgroundColor: '#FF6C00',
+    borderRadius: 100,
   },
-  buttonText: {
+  submitBtnText: {
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,
-
-    // color: '#FFFFFF',
   },
-  link: {
+  redirect: {
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,

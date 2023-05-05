@@ -9,21 +9,23 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import LogoutButton from '../../components/LogoutButton';
-import PlusIcon from '../../assets/images/plus-icon.svg';
-import { db, cloudStorage } from '../../firebase/config';
-import { ref, deleteObject } from 'firebase/storage';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeUserPhoto, uploadUserPhoto } from '../../redux/auth/authOperations';
 import { useToast } from 'react-native-toast-notifications';
+import * as ImagePicker from 'expo-image-picker';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
-import MessageIcon from '../../assets/images/message-icon.svg';
-import MapPin from '../../assets/images/map-pin.svg';
+import { db } from '../../firebase/config';
+import { changeUserPhoto } from '../../redux/auth/authOperations';
+
+import LogoutButton from '../../components/LogoutButton';
+import { PostItem } from '../../components/PostItem';
+
+import PlusIcon from '../../assets/images/plus-icon.svg';
 
 const ProfileScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const { userId, nickName, userPhoto, isLoading } = useSelector(state => state.auth);
   const dispatch = useDispatch();
   const toast = useToast();
@@ -35,6 +37,7 @@ const ProfileScreen = ({ navigation }) => {
       setPosts(
         data.docs.map(doc => ({ ...doc.data(), id: doc.id })).sort((a, b) => b.time - a.time)
       );
+      setLoading(false);
     });
     return () => {
       unsubscribe();
@@ -42,52 +45,44 @@ const ProfileScreen = ({ navigation }) => {
   }, []);
 
   const addUserPhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to make this work!');
-      }
-      const userPhoto = await ImagePicker.launchImageLibraryAsync();
-      if (userPhoto.canceled) {
-        return;
-      }
-      const photoPath = userPhoto.assets[0].uri;
-      dispatch(changeUserPhoto(photoPath, toast));
-    } catch (error) {
-      console.log(error.message);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
     }
+    const userPhoto = await ImagePicker.launchImageLibraryAsync();
+    if (userPhoto.canceled) {
+      return;
+    }
+    const photoPath = userPhoto.assets[0].uri;
+    dispatch(changeUserPhoto(photoPath, toast));
   };
 
   const deleteUserPhoto = async () => {
-    try {
-      dispatch(changeUserPhoto(null, toast));
-    } catch (error) {
-      console.log(error.message);
-    }
+    dispatch(changeUserPhoto(null, toast));
   };
 
   return (
     <ImageBackground style={styles.bgImage} source={require('../../assets/images/bgImage.jpg')}>
-      <View style={styles.profileContainer}>
-        <View style={styles.imgBox}>
+      <View style={styles.screenContainer}>
+        <View style={styles.imgContainer}>
           {isLoading && (
-            <View style={styles.loaderBox}>
+            <View style={styles.loaderContainer}>
               <ActivityIndicator size={60} color="#FF6C00" />
             </View>
           )}
           <Image
-            style={{ ...styles.image, opacity: isLoading ? 0.5 : 1 }}
+            style={{ ...styles.photo, opacity: isLoading ? 0.5 : 1 }}
             source={{ uri: userPhoto }}
           />
           {!userPhoto && (
-            <TouchableOpacity style={styles.buttonBox} onPress={addUserPhoto}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={addUserPhoto}>
               <PlusIcon width={25} height={25} fill="#FF6C00" />
             </TouchableOpacity>
           )}
           {userPhoto && (
             <TouchableOpacity
               style={{
-                ...styles.buttonBox,
+                ...styles.buttonContainer,
                 transform: [{ rotate: '45deg' }],
               }}
               onPress={deleteUserPhoto}
@@ -96,45 +91,29 @@ const ProfileScreen = ({ navigation }) => {
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.logoutBtnBox}>
+        <View style={styles.logoutBtnContainer}>
           <LogoutButton />
         </View>
-        <View style={styles.userInfoBox}>
+        <View style={styles.userInfoContainer}>
           <Text style={styles.userName}>{nickName}</Text>
         </View>
         <View style={styles.userPostsContainer}>
           <FlatList
+            contentContainerStyle={{ flexGrow: 1 }}
             data={posts}
-            // contentContainerStyle={{ marginBottom: 32 }}
-            keyExtractor={(item, indx) => indx.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.postContainer}>
-                <Image style={styles.postImage} source={{ uri: item.photo }} />
-                <Text style={styles.postTitle}>{item.title}</Text>
-                <View style={styles.postComponentsContainer}>
-                  <TouchableOpacity
-                    style={styles.componentContainer}
-                    onPress={() =>
-                      navigation.navigate('Comments', { postId: item.id, photo: item.photo })
-                    }
-                  >
-                    <MessageIcon style={{ marginRight: 6 }} width={24} height={24} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.componentContainer}
-                    onPress={() =>
-                      navigation.navigate('Map', {
-                        latitude: item.location.latitude,
-                        longitude: item.location.longitude,
-                      })
-                    }
-                  >
-                    <MapPin style={{ marginRight: 4 }} width={24} height={24} />
-                    <Text style={styles.mapLocation}>{item.locationName}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
+            keyExtractor={item => item.id}
+            ListEmptyComponent={
+              <>
+                {!loading && (
+                  <View style={styles.emptyPostsContainer}>
+                    <Text style={styles.emptyPostsText}>
+                      У вас нет постов, самое время сделать один!
+                    </Text>
+                  </View>
+                )}
+              </>
+            }
+            renderItem={({ item }) => <PostItem data={item} navigation={navigation} />}
           />
         </View>
       </View>
@@ -145,61 +124,68 @@ const ProfileScreen = ({ navigation }) => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    // flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-  },
   bgImage: {
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'flex-start',
   },
-  profileContainer: {
+  screenContainer: {
     flex: 1,
+
     position: 'relative',
+
     marginTop: 120,
     paddingTop: 92,
+
     backgroundColor: '#ffffff',
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
   },
-  imgBox: {
+  imgContainer: {
     alignContent: 'center',
+
     position: 'absolute',
     top: -60,
     left: '50%',
-    transform: [{ translateX: -60 }],
+
     width: 120,
     height: 120,
+
+    transform: [{ translateX: -60 }],
+
     backgroundColor: '#F6F6F6',
     borderRadius: 16,
   },
-  loaderBox: {
+  loaderContainer: {
+    justifyContent: 'center',
+
     position: 'absolute',
+
     height: '100%',
     width: '100%',
-    justifyContent: 'center',
+
     zIndex: 2,
   },
-  image: {
+  photo: {
     flex: 1,
+
     resizeMode: 'contain',
+
     borderRadius: 16,
   },
-  buttonBox: {
+  buttonContainer: {
     position: 'absolute',
     bottom: 14,
     right: -12.5,
     width: 25,
     height: 25,
   },
-  logoutBtnBox: {
+  logoutBtnContainer: {
     position: 'absolute',
     right: 16,
     top: 22,
   },
-  userInfoBox: {
+  userInfoContainer: {
     marginHorizontal: 16,
   },
   userName: {
@@ -212,46 +198,24 @@ const styles = StyleSheet.create({
     color: '#212121',
   },
 
-  /////////////////////////////////////////////
-
   userPostsContainer: {
+    flex: 1,
+
     paddingTop: 32,
     paddingBottom: 32,
   },
-  postContainer: {
-    marginHorizontal: 16,
-    marginBottom: 32,
-  },
-  postImage: {
-    height: 240,
-    width: '100%',
-    borderRadius: 8,
-
-    marginBottom: 8,
-  },
-  postTitle: {
-    marginBottom: 8,
-
-    fontFamily: 'Roboto-Medium',
-    fontSize: 16,
-    lineHeight: 19,
-
-    color: '#212121',
-  },
-  postComponentsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  componentContainer: {
-    flexDirection: 'row',
+  emptyPostsContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  mapLocation: {
-    fontFamily: 'Roboto-Regular',
-    fontSize: 16,
-    lineHeight: 19,
-    textDecorationLine: 'underline',
+  emptyPostsText: {
+    fontFamily: 'Roboto-Medium',
+    fontSize: 25,
+    lineHeight: 30,
+    textAlign: 'center',
+    letterSpacing: 0.01,
 
-    color: '#212121',
+    color: '#A9A9A9',
   },
 });

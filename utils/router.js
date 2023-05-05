@@ -1,3 +1,5 @@
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import LoginScreen from '../Screens/auth/LoginScreen';
@@ -6,8 +8,7 @@ import CommentsScreen from '../Screens/main/CommentsScreen';
 import Home from '../Screens/main/Home';
 import MapScreen from '../Screens/main/MapScreen';
 import GoBackButton from '../components/GoBackButton';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+
 import { auth } from '../firebase/config';
 
 const AuthStack = createNativeStackNavigator();

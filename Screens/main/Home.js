@@ -1,5 +1,5 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
@@ -40,9 +40,6 @@ const Home = ({ navigation }) => {
               <GoBackButton navigation={navigation} />
             </View>
           ),
-          headerLeftContainerStyle: {
-            // bottom: 10,
-          },
           tabBarIcon: ({ color }) => <CreateIcon name="Create posts" stroke={color} />,
           tabBarItemStyle: { ...baseTabBarOptions.tabBarItemStyle, marginRight: 15 },
           tabBarStyle: { position: 'absolute', bottom: -60 },
@@ -67,9 +64,7 @@ export default Home;
 
 const baseOptions = {
   headerTitleAlign: 'center',
-  headerStyle: {
-    // borderBottomWidth: 1,
-  },
+  headerStyle: {},
   headerTitleStyle: {
     fontFamily: 'Roboto-Medium',
     fontSize: 17,
@@ -80,15 +75,8 @@ const baseOptions = {
 
     color: '#212121',
   },
-  headerTitleContainerStyle: {
-    // bottom: 10,
-  },
-  headerRightContainerStyle: {
-    // bottom: 10,
-  },
   tabBarShowLabel: false,
   tabBarStyle: {
-    // height: 60,
     alignItems: 'center',
     borderTopWidth: 1,
   },

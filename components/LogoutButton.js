@@ -1,9 +1,11 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
-import LogOut from '../assets/images/log-out.svg';
 import { useDispatch } from 'react-redux';
-import { authLogOutUser } from '../redux/auth/authOperations';
 import { useToast } from 'react-native-toast-notifications';
+
+import { authLogOutUser } from '../redux/auth/authOperations';
+
+import LogOut from '../assets/images/log-out.svg';
 
 const LogoutButton = () => {
   const dispatch = useDispatch();

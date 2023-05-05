@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
+
 import ArrowLeft from '../assets/images/arrow-left.svg';
 
 const GoBackButton = ({ navigation }) => {

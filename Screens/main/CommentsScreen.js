@@ -4,41 +4,33 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  Button,
   FlatList,
   Image,
-  KeyboardAvoidingView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import { db } from '../../firebase/config';
-import { doc, collection, setDoc, onSnapshot, addDoc } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
+import { useToast } from 'react-native-toast-notifications';
+import { collection, onSnapshot } from 'firebase/firestore';
+
+import { db } from '../../firebase/config';
 import { useKeyboard } from '../../utils/keyboardActive';
+import { uploadComment } from '../../services/API';
+
 import SendIcon from '../../assets/images/send-icon.svg';
 import UserIcon from '../../assets/images/user-icon.svg';
 
 const CommentsScreen = ({ route }) => {
-  let flatList;
+  const [comment, setComment] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [allComments, setAllComments] = useState([]);
+
   const { postId, photo } = route.params;
   const { nickName, userPhoto } = useSelector(state => state.auth);
+  const { isKeyboardActive } = useKeyboard();
+  const toast = useToast();
 
-  const [comment, setComment] = useState('');
-  const [allComments, setAllComments] = useState([]);
-  console.log(allComments);
-
-  const keyboardIsActive = useKeyboard();
-
-  // const commentsRef = doc(collection(db, 'posts', postId, 'comments'));
   const commentsRef = collection(db, 'posts', postId, 'comments');
-
-  const sendComment = async () => {
-    try {
-      await addDoc(commentsRef, { comment, nickName, time: Date.now(), userPhoto });
-      setComment('');
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = onSnapshot(commentsRef, data => {
@@ -52,38 +44,37 @@ const CommentsScreen = ({ route }) => {
     };
   }, []);
 
+  const sendComment = async () => {
+    try {
+      setIsLoading(true);
+      await uploadComment(commentsRef, comment, nickName, userPhoto, toast);
+      setComment('');
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <View style={{ flex: 1, marginHorizontal: 16 }}>
-      <Image
-        style={{ ...styles.postPhoto, height: keyboardIsActive ? 0 : 240 }}
-        source={{ uri: photo }}
-      />
+    <View style={styles.screenContainer}>
+      {!isKeyboardActive && <Image style={styles.postPhoto} source={{ uri: photo }} />}
       <FlatList
         data={allComments}
-        ref={ref => {
-          flatList = ref;
-        }}
         keyExtractor={item => item.id}
-        // onContentSizeChange={() => flatList.scrollToEnd({ animated: true })}
-        // onLayout={() => flatList.scrollToEnd({ animated: false })}
         inverted={true}
         renderItem={({ item }) => (
-          <View style={styles.commentCont}>
-            <View style={styles.userInfo}>
-              <View style={styles.userPhotoBox}>
+          <View style={styles.commentContainer}>
+            <View style={styles.userInfoContainer}>
+              <View style={styles.userPhotoContainer}>
                 {!item.userPhoto && <UserIcon width={28} height={28} fill={'#BDBDBD'} />}
                 {item.userPhoto && (
-                  <Image
-                    style={{ width: 28, height: 28, borderRadius: 50 }}
-                    source={{ uri: item.userPhoto }}
-                  />
+                  <Image style={styles.userPhoto} source={{ uri: item.userPhoto }} />
                 )}
               </View>
               <Text style={styles.userNickName}>{item.nickName}</Text>
             </View>
-            <View style={styles.textBox}>
+            <View style={styles.commentInfoContainer}>
               <Text style={styles.comment}>{item.comment}</Text>
-              {/* <Text>{new Date(item.time).toLocaleTimeString('ua-UA')}</Text> */}
               <Text style={styles.date}>
                 {new Date(item.time).toLocaleString('ua-UA', {
                   day: 'numeric',
@@ -104,8 +95,9 @@ const CommentsScreen = ({ route }) => {
           value={comment}
           onChangeText={setComment}
         />
-        <TouchableOpacity style={styles.button} onPress={sendComment}>
-          <SendIcon width={34} height={34} />
+        <TouchableOpacity style={styles.submitBtn} onPress={sendComment}>
+          {!isLoading && <SendIcon width={34} height={34} />}
+          {isLoading && <ActivityIndicator color="#FFFFFF" size={24} />}
         </TouchableOpacity>
       </View>
     </View>
@@ -115,35 +107,42 @@ const CommentsScreen = ({ route }) => {
 export default CommentsScreen;
 
 const styles = StyleSheet.create({
-  commentCont: {
-    marginBottom: 14,
-  },
-  container: {
+  screenContainer: {
     flex: 1,
+    justifyContent: 'flex-end',
+
     marginHorizontal: 16,
   },
   postPhoto: {
     marginTop: 16,
     marginBottom: 16,
-    // height: 240,
+
+    height: 240,
     width: '100%',
 
     borderRadius: 8,
   },
-  commentsContainer: {
-    // flex: 1,
+  commentContainer: {
+    marginBottom: 14,
   },
-  userInfo: {
+  userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
 
     marginBottom: 5,
   },
-  userPhotoBox: {
+  userPhotoContainer: {
     marginRight: 8,
+
     borderWidth: 1,
     borderRadius: 50,
     borderColor: '#BDBDBD',
+  },
+  userPhoto: {
+    width: 28,
+    height: 28,
+
+    borderRadius: 50,
   },
   userNickName: {
     fontFamily: 'Roboto-Medium',
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
 
     color: '#212121',
   },
-  textBox: {
+  commentInfoContainer: {
     marginLeft: 28,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -165,20 +164,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 6,
   },
   comment: {
-    // marginLeft: 28,
-    // paddingHorizontal: 16,
-    // paddingVertical: 8,
-
     fontFamily: 'Roboto-Regular',
     fontSize: 14,
     lineHeight: 19,
 
     color: '#212121',
-    // backgroundColor: '#D3D3D3',
-
-    // borderTopRightRadius: 6,
-    // borderBottomRightRadius: 6,
-    // borderBottomLeftRadius: 6,
   },
   date: {
     textAlign: 'right',
@@ -207,10 +197,20 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderColor: '#BDBDBD',
   },
-  button: {
+  submitBtn: {
+    justifyContent: 'center',
+    alignItems: 'center',
+
     position: 'absolute',
     top: '50%',
     right: 8,
+
+    width: 34,
+    height: 34,
+
     transform: [{ translateY: -17 }],
+
+    backgroundColor: '#FF6C00',
+    borderRadius: 50,
   },
 });

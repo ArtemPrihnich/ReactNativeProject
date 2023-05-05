@@ -1,3 +1,4 @@
+import { ref, deleteObject } from 'firebase/storage';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -5,9 +6,10 @@ import {
   updateProfile,
   signOut,
 } from 'firebase/auth';
+
 import { auth, cloudStorage } from '../../firebase/config';
+import { uploadUserPhoto } from '../../services/API';
 import { authSlice } from './authReducer';
-import { getDownloadURL, ref, uploadBytes, deleteObject } from 'firebase/storage';
 
 const {
   updateUserProfile,
@@ -17,20 +19,6 @@ const {
   setLoadingState,
   setUserLoadingState,
 } = authSlice.actions;
-
-export const uploadUserPhoto = async (photo, id) => {
-  try {
-    const responce = await fetch(photo);
-    const file = await responce.blob();
-    const storageRef = ref(cloudStorage, `usersPhoto/${id}`);
-    await uploadBytes(storageRef, file);
-    const processedPhoto = await getDownloadURL(ref(storageRef));
-    return processedPhoto;
-  } catch (error) {
-    console.log(error);
-    console.log(error.message);
-  }
-};
 
 export const authSignUpUser =
   ({ email, login, password, userPhoto, toast }) =>
@@ -100,8 +88,6 @@ export const authSignInUser =
         placement: 'top',
         type: 'danger',
       });
-      console.log(error.code);
-      console.log('error.message', error.message);
     }
   };
 
@@ -116,8 +102,6 @@ export const authLogOutUser =
         placement: 'top',
         type: 'danger',
       });
-      console.log('error', error);
-      console.log('error.message', error.message);
     }
   };
 
@@ -126,7 +110,6 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
     dispatch(setLoadingState({ isLoading: true }));
     await onAuthStateChanged(auth, user => {
       if (user) {
-        console.log(user);
         dispatch(authStateChange({ stateChange: true }));
         dispatch(
           updateUserProfile({
@@ -142,8 +125,6 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
     });
   } catch (error) {
     dispatch(setLoadingState({ isLoading: false }));
-    console.log('error', error);
-    console.log('error.message', error.message);
   }
 };
 

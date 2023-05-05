@@ -1,6 +1,4 @@
-import { Camera, CameraType } from 'expo-camera';
-import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -9,6 +7,9 @@ import {
   ImageBackground,
   ActivityIndicator,
 } from 'react-native';
+import { Camera, CameraType } from 'expo-camera';
+import * as Location from 'expo-location';
+
 import CameraIcon from '../assets/images/camera-icon.svg';
 import TrashIcon from '../assets/images/trash-icon.svg';
 
@@ -22,25 +23,6 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
     locationRequestPermission();
   };
 
-  if (!cameraPermission) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#D3D3D3' }}>
-        <ActivityIndicator size={50} color="#FF6C00" />
-      </View>
-    );
-  }
-
-  if (!cameraPermission.granted || !locationPermission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>We need your permission to show the camera</Text>
-        <TouchableOpacity style={styles.button} onPress={getPermission} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>GRANT PERMISSION</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   const takePhoto = async () => {
     const makePhoto = await camera.takePictureAsync();
     writePhoto(makePhoto.uri);
@@ -50,20 +32,37 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
     });
     writeLocation(getLocation.coords);
     setLocationState(false);
-    console.log('done');
   };
+
   const deletePhoto = () => {
     writePhoto(null);
     writeLocation(null);
   };
 
   return (
-    <View>
-      {photo && (
+    <View style={styles.screenContainer}>
+      {!cameraPermission && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size={50} color="#FF6C00" />
+        </View>
+      )}
+      {cameraPermission && (!cameraPermission?.granted || !locationPermission?.granted) && (
+        <>
+          <Text style={styles.text}>We need your permission to show the camera</Text>
+          <TouchableOpacity
+            style={styles.permissionBtn}
+            onPress={getPermission}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.permissionBtnText}>GRANT PERMISSION</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      {cameraPermission?.granted && locationPermission?.granted && photo && (
         <View style={styles.photoContainer}>
           <ImageBackground style={styles.photo} source={{ uri: photo }}>
             <TouchableOpacity
-              style={{ ...styles.takePhotoButton, backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
+              style={{ ...styles.takePhotoBtn, backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
               onPress={deletePhoto}
             >
               <TrashIcon width={24} height={24} fill="#FFFFFF" />
@@ -71,9 +70,9 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
           </ImageBackground>
         </View>
       )}
-      {!photo && (
+      {cameraPermission?.granted && locationPermission?.granted && !photo && (
         <Camera style={styles.camera} type={CameraType.back} ref={setCamera}>
-          <TouchableOpacity style={styles.takePhotoButton} onPress={takePhoto}>
+          <TouchableOpacity style={styles.takePhotoBtn} onPress={takePhoto}>
             <CameraIcon width={24} height={24} fill={'#BDBDBD'} />
           </TouchableOpacity>
         </Camera>
@@ -85,46 +84,44 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
 export default CameraElement;
 
 const styles = StyleSheet.create({
-  container: {
+  screenContainer: {
     flex: 1,
     justifyContent: 'center',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    backgroundColor: '#D3D3D3',
+  },
   text: {
     marginBottom: 8,
+
     textAlign: 'center',
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,
   },
-  button: {
+  permissionBtn: {
     alignItems: 'center',
+
     paddingVertical: 5,
     marginHorizontal: 80,
+
     backgroundColor: '#FF6C00',
     borderRadius: 20,
   },
-  buttonText: {
+  permissionBtnText: {
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,
+
     color: '#FFFFFF',
-  },
-  camera: {
-    height: 240,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  takePhotoButton: {
-    width: 60,
-    height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    fill: '#BDBDBD',
-    borderRadius: 50,
   },
   photoContainer: {
     position: 'absolute',
+
     width: '100%',
     height: 240,
   },
@@ -132,5 +129,21 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  camera: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  takePhotoBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    width: 60,
+    height: 60,
+
+    backgroundColor: '#FFFFFF',
+    fill: '#BDBDBD',
+    borderRadius: 50,
   },
 });
