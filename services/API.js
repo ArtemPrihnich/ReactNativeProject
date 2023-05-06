@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc, increment } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 import { cloudStorage, db } from '../firebase/config';
@@ -42,6 +42,7 @@ export const uploadPostToServer = async (
       location,
       userId,
       nickName,
+      comments: 0,
       time: Date.now(),
     });
   } catch (error) {
@@ -61,6 +62,17 @@ export const uploadComment = async (commentsRef, comment, nickName, userPhoto, t
       placement: 'top',
       type: 'danger',
     });
+  }
+};
+
+export const updateCommentsCount = async id => {
+  try {
+    const postRef = doc(db, 'posts', id);
+    await updateDoc(postRef, {
+      comments: increment(1),
+    });
+  } catch (error) {
+    console.log(error);
   }
 };
 

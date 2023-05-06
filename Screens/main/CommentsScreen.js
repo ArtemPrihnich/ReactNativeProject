@@ -15,7 +15,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 
 import { db } from '../../firebase/config';
 import { useKeyboard } from '../../utils/keyboardActive';
-import { uploadComment } from '../../services/API';
+import { uploadComment, updateCommentsCount } from '../../services/API';
 
 import SendIcon from '../../assets/images/send-icon.svg';
 import UserIcon from '../../assets/images/user-icon.svg';
@@ -49,6 +49,7 @@ const CommentsScreen = ({ route }) => {
       setIsLoading(true);
       await uploadComment(commentsRef, comment, nickName, userPhoto, toast);
       setComment('');
+      await updateCommentsCount(postId);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);

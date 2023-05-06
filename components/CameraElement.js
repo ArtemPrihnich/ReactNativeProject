@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -14,22 +14,31 @@ import CameraIcon from '../assets/images/camera-icon.svg';
 import TrashIcon from '../assets/images/trash-icon.svg';
 
 const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) => {
-  const [locationPermission, locationRequestPermission] = Location.useForegroundPermissions();
-  const [cameraPermission, cameraRequestPermission] = Camera.useCameraPermissions();
+  const [cameraPermission, setCameraPermission] = useState(null);
+  const [locationPermission, setLocationPermission] = useState(null);
   const [camera, setCamera] = useState(null);
 
   const getPermission = async () => {
-    cameraRequestPermission();
-    locationRequestPermission();
+    const camera = await Camera.requestCameraPermissionsAsync();
+    setCameraPermission(camera.status === 'granted');
+    const location = await Location.requestForegroundPermissionsAsync();
+    setLocationPermission(location.status === 'granted');
   };
+
+  useEffect(() => {
+    (async () => {
+      const camera = await Camera.getCameraPermissionsAsync();
+      setCameraPermission(camera.status === 'granted');
+      const location = await Location.getForegroundPermissionsAsync();
+      setLocationPermission(location.status === 'granted');
+    })();
+  }, []);
 
   const takePhoto = async () => {
     const makePhoto = await camera.takePictureAsync();
     writePhoto(makePhoto.uri);
     setLocationState(true);
-    const getLocation = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Low,
-    });
+    const getLocation = await Location.getLastKnownPositionAsync();
     writeLocation(getLocation.coords);
     setLocationState(false);
   };
@@ -39,26 +48,28 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
     writeLocation(null);
   };
 
+  if (cameraPermission === null || locationPermission === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size={50} color="#FF6C00" />
+      </View>
+    );
+  }
+
+  if (cameraPermission === false || locationPermission === false) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>We need your permission to show the camera</Text>
+        <TouchableOpacity style={styles.permissionBtn} onPress={getPermission} activeOpacity={0.8}>
+          <Text style={styles.permissionBtnText}>GRANT PERMISSION</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.screenContainer}>
-      {!cameraPermission && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size={50} color="#FF6C00" />
-        </View>
-      )}
-      {cameraPermission && (!cameraPermission?.granted || !locationPermission?.granted) && (
-        <>
-          <Text style={styles.text}>We need your permission to show the camera</Text>
-          <TouchableOpacity
-            style={styles.permissionBtn}
-            onPress={getPermission}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.permissionBtnText}>GRANT PERMISSION</Text>
-          </TouchableOpacity>
-        </>
-      )}
-      {cameraPermission?.granted && locationPermission?.granted && photo && (
+      {photo && (
         <View style={styles.photoContainer}>
           <ImageBackground style={styles.photo} source={{ uri: photo }}>
             <TouchableOpacity
@@ -70,7 +81,7 @@ const CameraElement = ({ writePhoto, writeLocation, photo, setLocationState }) =
           </ImageBackground>
         </View>
       )}
-      {cameraPermission?.granted && locationPermission?.granted && !photo && (
+      {!photo && (
         <Camera style={styles.camera} type={CameraType.back} ref={setCamera}>
           <TouchableOpacity style={styles.takePhotoBtn} onPress={takePhoto}>
             <CameraIcon width={24} height={24} fill={'#BDBDBD'} />
@@ -95,7 +106,11 @@ const styles = StyleSheet.create({
 
     backgroundColor: '#D3D3D3',
   },
-  text: {
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  permissionText: {
     marginBottom: 8,
 
     textAlign: 'center',

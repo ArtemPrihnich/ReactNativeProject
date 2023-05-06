@@ -5,7 +5,7 @@ import ArrowLeft from '../assets/images/arrow-left.svg';
 
 const GoBackButton = ({ navigation }) => {
   return (
-    <TouchableOpacity onPress={() => navigation.goBack()}>
+    <TouchableOpacity style={{ padding: 4 }} onPress={() => navigation.goBack()}>
       <ArrowLeft width={24} height={24} />
     </TouchableOpacity>
   );

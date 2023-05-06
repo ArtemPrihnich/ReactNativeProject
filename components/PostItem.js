@@ -3,9 +3,10 @@ import { Text, View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 import MessageIcon from '../assets/images/message-icon.svg';
 import MapPin from '../assets/images/map-pin.svg';
+import { color } from 'react-native-reanimated';
 
 export const PostItem = item => {
-  const { photo, title, id, location, locationName } = item.data;
+  const { photo, title, id, location, locationName, comments } = item.data;
   const { navigate } = item.navigation;
 
   return (
@@ -17,7 +18,10 @@ export const PostItem = item => {
           style={styles.componentContainer}
           onPress={() => navigate('Comments', { postId: id, photo: photo })}
         >
-          <MessageIcon style={{ marginRight: 6 }} width={24} height={24} fill="#D3D3D3" />
+          <MessageIcon width={24} height={24} fill={comments > 0 ? '#FF6C00' : '#BDBDBD'} />
+          <Text style={{ ...styles.commentsCount, color: comments > 0 ? '#212121' : '#BDBDBD' }}>
+            {comments}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.componentContainer}
@@ -28,7 +32,7 @@ export const PostItem = item => {
             })
           }
         >
-          <MapPin style={{ marginRight: 4 }} width={24} height={24} />
+          <MapPin width={24} height={24} />
           <Text style={styles.mapLocation}>{locationName}</Text>
         </TouchableOpacity>
       </View>
@@ -68,7 +72,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  commentsCount: {
+    marginLeft: 5,
+
+    fontFamily: 'Roboto-Regular',
+    fontSize: 16,
+    lineHeight: 19,
+  },
   mapLocation: {
+    marginLeft: 4,
+
     fontFamily: 'Roboto-Regular',
     fontSize: 16,
     lineHeight: 19,

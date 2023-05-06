@@ -13,7 +13,7 @@ const LogoutButton = () => {
 
   const onLogOutClick = () => dispatch(authLogOutUser({ toast }));
   return (
-    <TouchableOpacity onPress={onLogOutClick}>
+    <TouchableOpacity style={{ padding: 4 }} onPress={onLogOutClick}>
       <LogOut width={24} height={24} />
     </TouchableOpacity>
   );
