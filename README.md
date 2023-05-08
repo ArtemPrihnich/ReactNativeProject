@@ -1,5 +1,5 @@
 # Social App
-Application with which you can create and comment on posts.
+An application developed for Android with which you can create and comment on posts.
 # Made with
 - Expo;
 - React;
